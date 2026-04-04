@@ -1,4 +1,4 @@
-﻿import { CONTACT_EMAIL, LEGAL_NOTICE_URL, PRIVACY_URL } from "@/core/config";
+import { CONTACT_EMAIL, LEGAL_NOTICE_URL, PRIVACY_URL } from "@/core/config";
 import { InfoIcon } from "@/shared/ui/Icons";
 
 export default function FooterNote() {
@@ -46,7 +46,7 @@ export default function FooterNote() {
 
       <div className="desktop-footer-middle">
         <p className="made-note">
-          Terraink™ v{appVersion} | © 2026 | Made with{" "}
+          MapArt v{appVersion} | © 2026 | Made with{" "}
           <span className="heart">❤︎</span> in Hannover, Germany
         </p>
       </div>

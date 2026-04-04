@@ -1,10 +1,10 @@
 services:
-  terraink:
+  mapart:
     build:
       context: .
       dockerfile: Dockerfile
-    image: terraink:latest
-    container_name: terraink
+    image: mapart:latest
+    container_name: mapart
     ports:
       - "${APP_PORT:-7200}:80"
     restart: unless-stopped

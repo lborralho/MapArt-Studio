@@ -1,6 +1,6 @@
 {
-  "name": "TerraInk",
-  "short_name": "TerraInk",
+  "name": "MapArt",
+  "short_name": "MapArt",
   "description": "Free map poster generator powered by OpenStreetMap data.",
   "id": "/",
   "start_url": "/",

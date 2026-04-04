@@ -1,8 +1,16 @@
 {
-  "name": "terraink",
+  "name": "mapart-studio",
   "private": true,
-  "version": "0.4.1",
+  "version": "1.0.0",
   "type": "module",
+  "homepage": "https://mapart-studio.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lborralho/MapArt-Studio.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

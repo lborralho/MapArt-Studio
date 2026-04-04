@@ -1,4 +1,4 @@
-﻿import { createPortal } from "react-dom";
+import { createPortal } from "react-dom";
 import { KOFI_URL } from "@/core/config";
 
 interface SupportModalProps {
@@ -32,7 +32,7 @@ export default function SupportModal({
             ✨ Your poster is ready!
           </p>
           <p className="credits-modal-text">
-            If Terraink helped you create this poster, consider supporting the project on Ko-fi.
+            If MapArt helped you create this poster, consider supporting the project on Ko-fi.
           </p>
           <p className="credits-modal-text">
             This was your poster <strong>#{posterNumber}</strong> 🎉
