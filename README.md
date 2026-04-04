@@ -2,7 +2,7 @@
 
 # MapArt Studio
 
-[![Website Badge](https://img.shields.io/badge/Website-fff?logo=appveyor&logoColor=000&style=for-the-badge)](https://mapart-studio.vercel.app)
+[![Website Badge](https://img.shields.io/badge/Website-fff?logo=appveyor&logoColor=000&style=for-the-badge)](https://mapart-studio-nxypwfqda-luis-borralhos-projects.vercel.app)
 [![GitHub Badge](https://img.shields.io/badge/GitHub-fff?logo=github&logoColor=000&style=for-the-badge)](https://github.com/lborralho/MapArt-Studio)
 
 [![Vite Badge](https://img.shields.io/badge/Vite-9135FF?logo=vite&logoColor=fff&style=for-the-badge)](https://vitejs.dev)

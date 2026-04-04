@@ -43,3 +43,4 @@ updates.json
 
 # ignore agent setting files
 .claude/
+.vercel
