@@ -69,11 +69,13 @@
 .install-help-modal {
   position: relative;
   width: min(420px, calc(100vw - 24px));
-  border: 1px solid rgba(146, 176, 200, 0.24);
-  border-radius: 14px;
-  background: rgba(9, 18, 27, 0.98);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.48);
-  padding: 18px 14px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  padding: 24px 20px 20px;
 }
 
 .install-help-modal-close {
@@ -94,11 +96,11 @@
 
 .install-help-modal-title {
   margin: 0 28px 12px 0;
-  font-family: "Spline Sans Mono", monospace;
+  font-family: var(--h3-font);
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(214, 234, 247, 0.92);
+  color: var(--color-surface-text);
 }
 
 .install-help-modal-text {
@@ -179,21 +181,22 @@ pre.install-help-modal-text {
 
 .app-kicker {
   margin: 0;
-  font-family: "Spline Sans Mono", monospace;
+  font-family: var(--h3-font);
   text-transform: uppercase;
   font-size: 0.76rem;
   letter-spacing: 0.16em;
-  opacity: 0.74;
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
 .app-header h1 {
   margin: 6px 0 6px;
-  font-family: "Bebas Neue", sans-serif;
+  font-family: var(--h1-font);
   font-size: clamp(2.35rem, 6.2vw, 4.7rem);
   line-height: 0.9;
   letter-spacing: 0.03em;
-  color: #ecf5ff;
-  text-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+  color: var(--color-surface-text);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 .app-copy {
@@ -219,12 +222,39 @@ pre.install-help-modal-text {
 .preview-panel,
 .inspector-card,
 .info-panel-group {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--panel);
-  box-shadow:
-    0 20px 42px rgba(0, 0, 0, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  transition: var(--transition-premium);
+  position: relative;
+  overflow: hidden;
+}
+
+.settings-panel::before,
+.preview-panel::before,
+.inspector-card::before,
+.info-panel-group::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--glass-highlight), transparent 40%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.settings-panel:hover,
+.preview-panel:hover,
+.inspector-card:hover {
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+  transform: translateY(-2px);
 }
 
 .settings-panel {
@@ -236,8 +266,8 @@ pre.install-help-modal-text {
 /* ── Accordion ── */
 
 .accordion-item {
-  border-bottom: 1px solid rgba(146, 176, 200, 0.12);
-  background: rgb(10 20 31 / 92%);
+  border-bottom: 1px solid var(--glass-border);
+  background: transparent;
 }
 
 .accordion-item:last-child {
@@ -245,7 +275,7 @@ pre.install-help-modal-text {
 }
 
 .accordion-item.accordion-item--open {
-  background: rgb(10 20 31 / 92%);
+  background: transparent;
 }
 
 .accordion-header {
@@ -253,37 +283,35 @@ pre.install-help-modal-text {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 20px 16px;
-  background: transparent;
+  padding: 18px 20px;
   border: none;
-  color: rgba(195, 220, 240, 0.88);
-  font-family: "Spline Sans Mono", monospace;
-  font-size: 0.78rem;
-  font-weight: 600;
+  color: var(--color-surface-text);
+  font-family: var(--h3-font);
+  font-size: 0.8rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   cursor: pointer;
-  transition:
-    color 0.18s ease,
-    background 0.18s ease;
+  transition: var(--transition-base);
   -webkit-tap-highlight-color: transparent;
-  background: rgb(10 20 31 / 92%);
+  background: transparent;
 }
 
 .accordion-header:hover {
-  color: #dff0ff;
-  background: rgba(94, 174, 212, 0.07);
+  color: var(--color-primary-hover);
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .accordion-header.is-open {
-  color: #b8ecff;
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.04);
 }
 
 .accordion-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  color: #88b7d5;
+  color: var(--color-surface-text-muted);
 }
 
 .accordion-label {
@@ -308,7 +336,7 @@ pre.install-help-modal-text {
 .accordion-body {
   display: grid;
   grid-template-rows: 0fr;
-  background: rgb(10 20 31 / 92%);
+  background: transparent;
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
@@ -396,12 +424,13 @@ pre.install-help-modal-text {
   margin-top: 12px;
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(94, 174, 212, 0.28);
-  background: rgba(10, 24, 36, 0.88);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border: var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   font-size: 0.84rem;
-  color: #b8d4e8;
+  color: var(--color-text);
+  box-shadow: var(--glass-shadow);
 }
 
 .install-prompt-text {
@@ -422,28 +451,21 @@ button.install-prompt-btn {
   margin: 0;
   padding: 7px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(94, 174, 212, 0.6);
-  background: linear-gradient(
-    135deg,
-    rgba(38, 112, 158, 0.95) 0%,
-    rgba(25, 78, 115, 0.95) 100%
-  );
-  color: #dff3ff;
+  border: none;
+  background: var(--color-primary);
+  color: white;
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 0 10px rgba(94, 174, 212, 0.22);
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  box-shadow: 0 4px 12px rgba(242, 139, 130, 0.25);
+  transition: all 0.2s ease;
 }
 
 button.install-prompt-btn:hover {
-  transform: none;
-  filter: none;
-  border-color: rgba(130, 200, 240, 0.85);
-  box-shadow: 0 0 18px rgba(94, 174, 212, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(242, 139, 130, 0.35);
+  filter: brightness(1.05);
 }
 
 button.install-prompt-dismiss {
@@ -454,27 +476,21 @@ button.install-prompt-dismiss {
   margin: 0;
   padding: 7px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(94, 174, 212, 0.22);
+  border: 1px solid var(--color-border);
   background: transparent;
-  color: #6a9ab8;
+  color: var(--color-text-muted);
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   line-height: 1;
   letter-spacing: 0.015em;
-  box-sizing: border-box;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease,
-    background 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 button.install-prompt-dismiss:hover {
-  transform: none;
-  filter: none;
-  color: #a8cfe5;
-  border-color: rgba(94, 174, 212, 0.45);
-  background: rgba(94, 174, 212, 0.025);
+  color: var(--color-text);
+  border-color: var(--color-primary-light);
+  background: rgba(242, 139, 130, 0.05);
 }
 
 .install-prompt-share-icon {

@@ -78,12 +78,15 @@
     justify-content: space-between;
     margin: 0;
     padding: 0 20px;
-    background: rgba(9, 16, 24, 0.97);
-    border-bottom: 1px solid rgba(146, 176, 200, 0.12);
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.28);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
     z-index: 50;
     gap: 14px;
     flex-shrink: 0;
+    transition: var(--transition-premium);
   }
 
   .desktop-brand {
@@ -111,7 +114,7 @@
     font-size: 1.62rem;
     line-height: 1;
     letter-spacing: 0.03em;
-    color: #ecf5ff;
+    color: var(--color-surface-text);
   }
 
   .desktop-brand-kicker {
@@ -120,7 +123,7 @@
     font-size: 0.67rem;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: rgba(184, 212, 232, 0.5);
+    color: var(--color-surface-text-muted);
   }
 
   .general-header-actions {
@@ -140,10 +143,10 @@
   .general-header-social-btn {
     width: 34px;
     height: 34px;
-    border: 1px solid rgba(146, 176, 200, 0.2);
+    border: 1px solid var(--color-border);
     border-radius: 9px;
-    background: rgba(10, 20, 31, 0.78);
-    color: rgba(195, 220, 240, 0.86);
+    background: var(--glass-bg);
+    color: var(--color-text);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -161,9 +164,9 @@
 
   .general-header-social-btn:hover,
   .general-header-social-btn:focus-visible {
-    background: rgba(94, 174, 212, 0.1);
-    border-color: rgba(94, 174, 212, 0.5);
-    color: #c8e8f8;
+    background: rgba(242, 139, 130, 0.08);
+    border-color: var(--color-primary-light);
+    color: var(--color-primary);
   }
 
   .general-header-social-btn--github {
@@ -193,18 +196,17 @@
   }
 
   .general-header-text-btn {
-    transition:
-      background 0.15s,
-      border-color 0.15s,
-      color 0.15s;
+    transition: all 0.2s ease;
+    border: 1px solid var(--color-border);
+    background: var(--glass-bg);
+    color: var(--color-text);
   }
 
   .general-header-text-btn:hover:not(:disabled) {
-    transform: none;
-    filter: none;
-    background: rgba(94, 174, 212, 0.1);
-    border-color: rgba(94, 174, 212, 0.5);
-    color: #c8e8f8;
+    transform: translateY(-1px);
+    background: rgba(242, 139, 130, 0.05);
+    border-color: var(--color-primary-light);
+    color: var(--color-primary);
   }
 
   .general-header-btn-label {
@@ -224,8 +226,10 @@
     align-items: center;
     padding: 8px 0;
     gap: 2px;
-    background: rgba(10, 20, 31, 0.98);
-    border-right: 1px solid rgba(146, 176, 200, 0.1);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-right: 1px solid var(--glass-border);
     overflow-y: auto;
     scrollbar-width: none;
     z-index: 40;
@@ -237,50 +241,57 @@
 
   .desktop-nav-tab {
     flex-shrink: 0;
-    width: 52px;
-    height: 52px;
+    width: 64px;
+    height: 64px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    padding: 4px 0;
+    gap: 6px;
+    padding: 8px 0;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     background: transparent;
-    color: rgba(180, 205, 225, 0.42);
-    font-size: 0.5rem;
-    font-weight: 600;
-    font-family: "Spline Sans Mono", monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    color: var(--color-surface-text-muted);
     cursor: pointer;
-    transition:
-      background 0.15s,
-      color 0.15s;
+    transition: var(--transition-premium);
     -webkit-tap-highlight-color: transparent;
+    margin-bottom: 8px;
   }
 
-  .desktop-nav-tab:hover {
-    transform: none;
-    filter: none;
-    background: rgba(94, 174, 212, 0.1);
-    color: rgba(180, 205, 225, 0.72);
+  .desktop-nav-tab:hover:not(:disabled) {
+    background: rgba(242, 139, 130, 0.08);
+    color: var(--color-primary);
+    transform: scale(1.05);
+  }
+
+  .desktop-nav-tab:active:not(:disabled) {
+    transform: scale(0.95);
   }
 
   .desktop-nav-tab.is-active {
-    background: rgba(55, 171, 203, 0.16);
-    color: #7dd8f0;
+    background: rgba(242, 139, 130, 0.12);
+    color: var(--color-primary);
   }
 
   .desktop-nav-icon {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
+    transition: var(--transition-base);
   }
 
   .desktop-nav-label {
     line-height: 1;
-    font-size: 0.48rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #333333; /* Darker for better visibility */
+  }
+
+  .desktop-nav-tab:hover .desktop-nav-label,
+  .desktop-nav-tab.is-active .desktop-nav-label {
+    color: var(--color-primary);
   }
 
   .desktop-nav-tab--settings {
@@ -332,15 +343,21 @@
   .dsk-loc-bar .location-search-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(20, 36, 52, 0.97);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(171, 201, 224, 0.34);
+    gap: 8px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
     width: 100%;
-    padding: 1px 6px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+    padding: 4px 10px;
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-premium);
+  }
+
+  .dsk-loc-bar .location-search-row:focus-within {
+    border-color: rgba(242, 139, 130, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(242, 139, 130, 0.1);
   }
 
   .dsk-loc-bar .location-search-stack {
@@ -369,14 +386,15 @@
 
   .dsk-loc-bar .location-input-wrap input {
     margin-top: 0;
-    min-height: 30px;
+    min-height: 40px;
     padding: 2px 22px 2px 10px;
     background: transparent;
     border: none;
     border-radius: 0;
-    color: #e8f4ff;
-    font-family: "Spline Sans Mono", monospace;
-    font-size: 0.82rem;
+    color: var(--color-surface-text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
     box-shadow: none;
   }
 
@@ -412,12 +430,13 @@
   /* Search icon (decorative, left of input) */
   .dsk-loc-bar .location-search-icon {
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(183, 215, 235, 0.52);
+    color: var(--color-primary);
+    opacity: 0.7;
     font-size: 0.9rem;
     pointer-events: none;
   }
@@ -425,21 +444,26 @@
   /* Shared styles for icon buttons inside the pill */
   .dsk-loc-bar button.location-row-icon-btn {
     flex-shrink: 0;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     padding: 0;
-    border: 1px solid rgba(157, 189, 214, 0.26);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 9px;
-    background: rgba(31, 56, 75, 0.62);
-    color: rgba(210, 231, 245, 0.85);
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--color-surface-text-muted);
     font-size: 1.05rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition:
-      background 0.15s,
-      border-color 0.15s,
-      color 0.15s;
+    transition: var(--transition-premium);
+  }
+
+  .dsk-loc-bar button.location-row-icon-btn:hover:not(:disabled) {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
   }
 
   .dsk-loc-bar button.location-row-icon-btn svg {
@@ -587,12 +611,12 @@
     overflow-y: auto;
     overflow-x: hidden;
     pointer-events: auto;
-    background: rgba(11, 20, 30, 0.98);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(146, 176, 200, 0.14);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: 14px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--glass-shadow);
     overscroll-behavior: contain;
     scrollbar-width: none;
   }
@@ -609,7 +633,7 @@
   .desktop-settings-slide .settings-panel {
     border: none;
     border-radius: 0;
-    background: rgba(11, 20, 30, 0.98);
+    background: transparent;
     box-shadow: none;
     min-width: unset;
     width: 100%;
@@ -794,10 +818,10 @@
     width: 320px;
     margin: 0;
     z-index: 16;
-    background: rgba(10, 20, 31, 0.72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(146, 176, 200, 0.2);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
   }
 
@@ -1199,55 +1223,45 @@
 
   /* Primary = PNG/Download — white/light, like browser-default generate-btn */
   .desktop-export-btn--primary {
-    background: rgba(232, 242, 251, 0.96);
-    border-color: rgba(180, 210, 235, 0.55);
-    color: #0d1f2e;
+    background: var(--color-primary);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 14px rgba(242, 139, 130, 0.4);
   }
 
   .desktop-export-btn--primary:hover:not(:disabled) {
-    transform: none;
-    filter: none;
-    background: rgba(220, 236, 250, 1);
-    border-color: rgba(140, 185, 220, 0.8);
-    color: #091826;
+    transform: translateY(-1px);
+    background: var(--color-primary);
+    filter: brightness(1.08);
+    box-shadow: 0 6px 20px rgba(242, 139, 130, 0.55);
   }
 
   /* PDF — dark warm/brown, like mobile .ghost but darker */
   .desktop-export-btn--pdf {
-    background: rgba(48, 22, 8, 0.92);
-    border-color: rgba(255, 142, 94, 0.36);
-    color: #ffc6aa;
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
   }
 
   .desktop-export-btn--pdf:hover:not(:disabled) {
-    transform: none;
-    filter: none;
-    background: rgba(65, 30, 10, 0.96);
-    border-color: rgba(255, 142, 94, 0.64);
-    color: #ffd5be;
+    transform: translateY(-1px);
+    background: rgba(242, 139, 130, 0.05);
+    border-color: var(--color-primary-light);
+    color: var(--color-primary);
   }
 
   /* SVG — solid dark green, like mobile export-map-btn */
   .desktop-export-btn--svg {
-    background: linear-gradient(
-      135deg,
-      rgba(42, 126, 79, 0.96),
-      rgba(29, 103, 64, 0.96)
-    );
-    border-color: rgba(120, 221, 161, 0.56);
-    color: #effff5;
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
   }
 
   .desktop-export-btn--svg:hover:not(:disabled) {
-    transform: none;
-    filter: none;
-    background: linear-gradient(
-      135deg,
-      rgba(50, 141, 89, 0.98),
-      rgba(34, 117, 73, 0.98)
-    );
-    border-color: rgba(147, 235, 183, 0.88);
-    color: #f0fff6;
+    transform: translateY(-1px);
+    background: rgba(242, 139, 130, 0.05);
+    border-color: var(--color-primary-light);
+    color: var(--color-primary);
   }
 
   /* Label swap: "Download" by default, "PNG" on FAB hover */

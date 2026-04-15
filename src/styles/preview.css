@@ -2,15 +2,8 @@
   position: relative;
   min-height: 850px;
   border-radius: 14px;
-  border: 1px solid var(--strong-line);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 28%),
-    radial-gradient(
-      circle at 82% 16%,
-      rgba(77, 161, 201, 0.28),
-      transparent 32%
-    ),
-    linear-gradient(145deg, rgba(14, 33, 46, 0.96), rgba(11, 26, 38, 0.9));
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #f8f8f8;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -22,9 +15,9 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(130, 170, 197, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(130, 170, 197, 0.1) 1px, transparent 1px);
-  background-size: 26px 26px;
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 /* ── Poster frame ── */
@@ -381,20 +374,22 @@
 
 .settings-info-card {
   margin: 10px;
-  padding: 12px;
-  border: 1px solid rgba(137, 176, 200, 0.3);
-  border-radius: 10px;
-  background: rgba(10, 24, 35, 0.72);
-  color: #d5e7f5;
+  padding: 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: white; /* High contrast as requested */
+  color: var(--color-surface-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .settings-info-title {
-  margin: 0 0 8px;
-  font-size: 0.82rem;
-  font-family: "Spline Sans Mono", monospace;
-  letter-spacing: 0.02em;
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(188, 219, 238, 0.9);
+  color: var(--color-primary);
 }
 
 .settings-info-list {
@@ -412,17 +407,18 @@
 
 .settings-info-row dt {
   margin: 0;
-  font-family: "Spline Sans Mono", monospace;
-  font-size: 0.68rem;
+  font-weight: 700;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: rgba(156, 195, 218, 0.72);
+  color: #555; /* Higher contrast for light theme */
 }
 
 .settings-info-row dd {
   margin: 0;
-  font-size: 0.86rem;
-  color: #e1eff9;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-surface-text);
 }
 
 @media (max-width: 700px) {
