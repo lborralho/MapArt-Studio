@@ -926,48 +926,6 @@
     text-decoration: none;
   }
 
-  .desktop-footer-info-btn {
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    margin: 0;
-    border: 1px solid rgba(146, 176, 200, 0.2);
-    border-radius: 999px;
-    background: rgba(15, 30, 43, 0.9);
-    color: rgba(200, 228, 248, 0.78);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .desktop-footer-info-btn svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  .desktop-footer-attribution {
-    position: absolute;
-    right: 0;
-    bottom: calc(100% + 8px);
-    max-width: min(420px, 55vw);
-    padding: 8px 10px;
-    border: 1px solid rgba(146, 176, 200, 0.24);
-    border-radius: 8px;
-    background: rgba(10, 20, 31, 0.98);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
-    font-size: 0.66rem;
-    line-height: 1.35;
-    white-space: normal;
-    color: #9bb3c5;
-    z-index: 60;
-    text-align: left;
-    display: none;
-  }
-
-  .desktop-footer-right:hover .desktop-footer-attribution,
-  .desktop-footer-info-btn:hover + .desktop-footer-attribution {
-    display: block;
-  }
 
   .mobile-persistent-footer {
     display: none;

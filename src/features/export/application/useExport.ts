@@ -123,7 +123,6 @@ export function useExport() {
             fontFamily: form.fontFamily.trim(),
             showPosterText: form.showPosterText,
             showOverlay: form.showMarkers,
-            includeCredits: form.includeCredits,
             markers: hasVisibleMarkers ? state.markers : [],
             markerIcons: hasVisibleMarkers
               ? getAllMarkerIcons(state.customMarkerIcons)
@@ -160,7 +159,6 @@ export function useExport() {
           fontFamily: form.fontFamily.trim(),
           showPosterText: form.showPosterText,
           showOverlay: form.showMarkers,
-          includeCredits: form.includeCredits,
           markers: hasVisibleMarkers ? state.markers : [],
           markerIcons: hasVisibleMarkers
             ? getAllMarkerIcons(state.customMarkerIcons)

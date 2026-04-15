@@ -8,7 +8,7 @@ import type { ExportOptions, CanvasSize } from "../../domain/types";
  *
  * 1. Draws the captured map image.
  * 2. Applies gradient fades (top + bottom).
- * 3. Draws poster text (city, country, coords, attribution).
+ * 3. Draws poster text (city, country, coords).
  *
  * Returns the composited canvas + its size metadata.
  */
@@ -26,7 +26,6 @@ export async function compositeExport(
     fontFamily,
     showPosterText = true,
     showOverlay = true,
-    includeCredits = true,
     markers = [],
     markerIcons = [],
     markerProjection,
@@ -77,8 +76,6 @@ export async function compositeExport(
     displayCountry,
     fontFamily,
     showPosterText,
-    showOverlay,
-    includeCredits,
   );
 
   const size: CanvasSize = {

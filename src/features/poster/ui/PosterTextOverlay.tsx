@@ -1,21 +1,17 @@
 import { formatCoordinates } from "@/shared/geo/posterBounds";
-import { APP_CREDIT_URL } from "@/core/config";
 import {
   TEXT_DIMENSION_REFERENCE_PX,
   TEXT_CITY_Y_RATIO,
   TEXT_DIVIDER_Y_RATIO,
   TEXT_COUNTRY_Y_RATIO,
   TEXT_COORDS_Y_RATIO,
-  TEXT_EDGE_MARGIN_RATIO,
   CITY_TEXT_SHRINK_THRESHOLD,
   CITY_FONT_BASE_PX,
   CITY_FONT_MIN_PX,
   COUNTRY_FONT_BASE_PX,
   COORDS_FONT_BASE_PX,
-  ATTRIBUTION_FONT_BASE_PX,
   formatCityLabel,
 } from "@/features/poster/domain/textLayout";
-import { parseHex } from "@/shared/utils/color";
 
 interface PosterTextOverlayProps {
   city: string;
@@ -24,15 +20,13 @@ interface PosterTextOverlayProps {
   lon: number;
   fontFamily: string;
   textColor: string;
-  landColor: string;
   showPosterText: boolean;
-  includeCredits: boolean;
   showOverlay: boolean;
 }
 
 /**
  * DOM-based poster text overlay (sharp at any resolution, GPU-composited).
- * Renders city name, divider, country, coordinates, and attribution
+ * Renders city name, divider, country, and coordinates
  * positioned to match the canvas export layout exactly.
  */
 export default function PosterTextOverlay({
@@ -42,9 +36,7 @@ export default function PosterTextOverlay({
   lon,
   fontFamily,
   textColor,
-  landColor,
   showPosterText,
-  includeCredits,
   showOverlay,
 }: PosterTextOverlayProps) {
   const toCqMin = (px: number) => (px / TEXT_DIMENSION_REFERENCE_PX) * 100;
@@ -68,17 +60,8 @@ export default function PosterTextOverlay({
 
   const countryFontSize = `${toCqMin(COUNTRY_FONT_BASE_PX)}cqmin`;
   const coordsFontSize = `${toCqMin(COORDS_FONT_BASE_PX)}cqmin`;
-  const attributionFontSize = `${toCqMin(ATTRIBUTION_FONT_BASE_PX)}cqmin`;
-  const landRgb = parseHex(landColor);
-  const landLuma = landRgb
-    ? (0.2126 * landRgb.r + 0.7152 * landRgb.g + 0.0722 * landRgb.b) / 255
-    : 0.5;
-  const attributionColor = showOverlay
-    ? textColor
-    : landLuma < 0.52
-      ? "#f5faff"
-      : "#0e1822";
-  const attributionOpacity = showOverlay ? 0.55 : 0.9;
+
+  void showOverlay; // kept in props for future use but attribution removed
 
   return (
     <div className="poster-text-overlay" style={{ color: textColor }}>
@@ -122,36 +105,6 @@ export default function PosterTextOverlay({
             {formatCoordinates(lat, lon)}
           </p>
         </>
-      )}
-
-      <span
-        className="poster-attribution"
-        style={{
-          fontFamily: bodyFont,
-          color: attributionColor,
-          opacity: attributionOpacity,
-          fontSize: attributionFontSize,
-          bottom: `${TEXT_EDGE_MARGIN_RATIO * 100}%`,
-          right: `${TEXT_EDGE_MARGIN_RATIO * 100}%`,
-        }}
-      >
-        &copy; OpenStreetMap contributors
-      </span>
-
-      {includeCredits && (
-        <span
-          className="poster-credits"
-          style={{
-            fontFamily: bodyFont,
-            color: attributionColor,
-            opacity: attributionOpacity,
-            fontSize: attributionFontSize,
-            bottom: `${TEXT_EDGE_MARGIN_RATIO * 100}%`,
-            left: `${TEXT_EDGE_MARGIN_RATIO * 100}%`,
-          }}
-        >
-          created with {APP_CREDIT_URL}
-        </span>
       )}
     </div>
   );

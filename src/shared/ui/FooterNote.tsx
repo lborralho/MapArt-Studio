@@ -1,5 +1,4 @@
 import { CONTACT_EMAIL, LEGAL_NOTICE_URL, PRIVACY_URL } from "@/core/config";
-import { InfoIcon } from "@/shared/ui/Icons";
 
 export default function FooterNote() {
   const appVersion = String(import.meta.env.VITE_APP_VERSION ?? "0.0.0").trim();
@@ -51,66 +50,7 @@ export default function FooterNote() {
         </p>
       </div>
 
-      <div className="desktop-footer-right">
-        <p className="source-note">
-          Map data &copy;{" "}
-          <a
-            className="source-link"
-            href="https://www.openstreetmap.org/copyright"
-            target="_blank"
-            rel="noreferrer"
-          >
-            OpenStreetMap contributors
-          </a>
-        </p>
-        <button
-          type="button"
-          className="desktop-footer-info-btn"
-          aria-label="More map attribution"
-          aria-expanded="false"
-        >
-          <InfoIcon />
-        </button>
-        <div className="desktop-footer-attribution">
-          Tiles &copy;{" "}
-          <a
-            className="source-link"
-            href="https://openmaptiles.org/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            OpenMapTiles
-          </a>
-          {" | "}Powered by{" "}
-          <a
-            className="source-link"
-            href="https://openfreemap.org/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            OpenFreeMap
-          </a>
-          {", "}
-          <a
-            className="source-link"
-            href="https://nominatim.openstreetmap.org/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Nominatim
-          </a>
-          {" & "}
-          <a
-            className="source-link"
-            href="https://maplibre.org/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            MapLibre
-          </a>
-          .
-        </div>
-      </div>
+      <div className="desktop-footer-right" />
     </footer>
   );
 }
