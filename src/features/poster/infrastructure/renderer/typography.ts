@@ -30,8 +30,20 @@ export function drawPosterText(
   fontFamily: string | undefined,
   showPosterText: boolean,
   showOverlay: boolean,
+  includeCredits: boolean = true,
 ): void {
   const textColor = theme.ui?.text || "#111111";
+  const landColor = theme.map?.land || "#808080";
+  const landRgb = parseHex(landColor);
+  const landLuma = landRgb
+    ? (0.2126 * landRgb.r + 0.7152 * landRgb.g + 0.0722 * landRgb.b) / 255
+    : 0.5;
+  const attributionColor = showOverlay
+    ? textColor
+    : landLuma < 0.52
+      ? "#f5faff"
+      : "#0e1822";
+  const attributionAlpha = showOverlay ? 0.55 : 0.9;
   const titleFontFamily = fontFamily
     ? `"${fontFamily}", "Space Grotesk", sans-serif`
     : '"Space Grotesk", sans-serif';
@@ -43,6 +55,7 @@ export function drawPosterText(
     0.45,
     Math.min(width, height) / TEXT_DIMENSION_REFERENCE_PX,
   );
+  const attributionFontSize = ATTRIBUTION_FONT_BASE_PX * dimScale;
 
   if (showPosterText) {
     const cityLabel = formatCityLabel(city);
@@ -84,6 +97,32 @@ export function drawPosterText(
       formatCoordinates(center.lat, center.lon),
       width * 0.5,
       coordinatesY,
+    );
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.fillStyle = attributionColor;
+  ctx.globalAlpha = attributionAlpha;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "bottom";
+  ctx.font = `300 ${attributionFontSize}px ${bodyFontFamily}`;
+  ctx.fillText(
+    "\u00a9 OpenStreetMap contributors",
+    width * (1 - TEXT_EDGE_MARGIN_RATIO),
+    height * (1 - TEXT_EDGE_MARGIN_RATIO),
+  );
+  ctx.globalAlpha = 1;
+
+  if (includeCredits) {
+    ctx.fillStyle = attributionColor;
+    ctx.globalAlpha = attributionAlpha;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "bottom";
+    ctx.font = `300 ${attributionFontSize}px ${bodyFontFamily}`;
+    ctx.fillText(
+      `created with ${APP_CREDIT_URL}`,
+      width * TEXT_EDGE_MARGIN_RATIO,
+      height * (1 - TEXT_EDGE_MARGIN_RATIO),
     );
     ctx.globalAlpha = 1;
   }

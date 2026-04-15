@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { useExport } from "@/features/export/application/useExport";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { DownloadIcon, LoaderIcon } from "@/shared/ui/Icons";
-
+import SupportModal from "@/features/export/ui/SupportModal";
 
 export default function DesktopExportFab() {
   const {
     handleDownloadPng,
     handleDownloadPdf,
     handleDownloadSvg,
+    supportPrompt,
+    dismissSupportPrompt,
   } = useExport();
   const { state } = usePosterContext();
   const [activeFormat, setActiveFormat] = useState<"png" | "pdf" | "svg" | null>(null);
@@ -64,7 +66,13 @@ export default function DesktopExportFab() {
         </button>
       </div>
 
-
+      {supportPrompt ? (
+        <SupportModal
+          posterNumber={supportPrompt.posterNumber}
+          onClose={dismissSupportPrompt}
+          titleId="fab-export-support-modal-title"
+        />
+      ) : null}
     </>
   );
 }

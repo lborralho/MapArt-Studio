@@ -25,6 +25,7 @@ export interface ExportOptions {
   fontFamily: string;
   showPosterText: boolean;
   showOverlay?: boolean;
+  includeCredits?: boolean;
   markers?: MarkerItem[];
   markerIcons?: MarkerIconDefinition[];
   markerProjection?: MarkerProjectionInput;
@@ -39,4 +40,5 @@ export interface Typography {
   displayContinent?: string;
   fontFamily: string;
   showPosterText: boolean;
+  includeCredits?: boolean;
 }
