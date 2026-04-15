@@ -26,161 +26,12 @@ import {
 
 /* ── sub-components ── */
 
-function HelpUsGrowSection({
-  repoUrl,
-  repoStars,
-  repoStarsLoading,
-}: {
-  repoUrl: string;
-  repoStars: number | null;
-  repoStarsLoading: boolean;
-}) {
-  const starsText = repoStarsLoading
-    ? "…"
-    : repoStars !== null
-      ? repoStars.toLocaleString()
-      : null;
-
-  const socialLinks = [
-    {
-      href: String(SOCIAL_LINKEDIN ?? "").trim(),
-      Icon: LinkedInIcon,
-      label: "LinkedIn",
-    },
-    {
-      href: String(SOCIAL_INSTAGRAM ?? "").trim(),
-      Icon: InstagramIcon,
-      label: "Instagram",
-    },
-    {
-      href: String(SOCIAL_REDDIT ?? "").trim(),
-      Icon: RedditIcon,
-      label: "Reddit",
-    },
-    {
-      href: String(SOCIAL_THREADS ?? "").trim(),
-      Icon: ThreadsIcon,
-      label: "Threads",
-    },
-    {
-      href: String(SOCIAL_YOUTUBE ?? "").trim(),
-      Icon: YouTubeIcon,
-      label: "YouTube",
-    },
-  ];
-  const kofiUrl = String(KOFI_URL ?? "").trim();
-
+function HelpUsGrowSection() {
   return (
     <section className="info-panel-section">
-      <h3>Help Us Grow</h3>
       <p className="hug-copy">
-        MapArt is 100% client-side and open-source. Help us build the future
-        of map art by contributing to our roadmap!
+        Minimalist map art studio. Create and download high-quality map posters.
       </p>
-
-      <div className="hug-rows">
-        {/* Support the project */}
-        <div className="hug-row">
-          <span className="hug-row-label">Support the project</span>
-          <div className="hug-row-content">
-            {repoUrl ? (
-              <a
-                className="github-badge"
-                href={repoUrl}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Open MapArt repository on GitHub"
-              >
-                <GitHubIcon className="badge-icon" />
-                <span>GitHub Repo</span>
-              </a>
-            ) : (
-              <span className="github-badge" style={{ opacity: 0.45 }}>
-                <GitHubIcon className="badge-icon" />
-                <span>GitHub Repo</span>
-              </span>
-            )}
-            {repoUrl ? (
-              <a
-                className="github-badge stars-badge"
-                href={`${repoUrl}/stargazers`}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Star MapArt on GitHub"
-              >
-                <StarIcon className="badge-icon" />
-                <span>{starsText !== null ? starsText : "Star"}</span>
-              </a>
-            ) : (
-              <span
-                className="github-badge stars-badge"
-                style={{ opacity: 0.45 }}
-              >
-                <StarIcon className="badge-icon" />
-                <span>Star</span>
-              </span>
-            )}
-            {kofiUrl ? (
-              <a
-                className="github-badge"
-                href={kofiUrl}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Support MapArt on Ko-fi"
-              >
-                <KofiIcon className="badge-icon" />
-                <span>Support on Ko-fi</span>
-              </a>
-            ) : (
-              <span className="github-badge" style={{ opacity: 0.45 }}>
-                <KofiIcon className="badge-icon" />
-                <span>Support on Ko-fi</span>
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Spread the word */}
-        <div className="hug-row">
-          <span className="hug-row-label">Spread the word</span>
-          <div className="hug-row-content social-links-row">
-            {socialLinks.map(({ href, Icon, label }) =>
-              href ? (
-                <a
-                  key={label}
-                  className="social-badge"
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`Follow MapArt on ${label}`}
-                  title={label}
-                >
-                  <Icon className="social-icon" />
-                </a>
-              ) : (
-                <span
-                  key={label}
-                  className="social-badge social-badge--inactive"
-                  title={label}
-                >
-                  <Icon className="social-icon" />
-                </span>
-              ),
-            )}
-          </div>
-        </div>
-
-        {/* Support the mission */}
-        <div className="hug-row">
-          <span className="hug-row-label">Support the mission</span>
-          <div className="hug-row-content">
-            <span className="hug-credits-note">
-              <CheckIcon className="hug-check-icon" />
-              Include credits to help others discover the tool
-            </span>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
@@ -194,11 +45,7 @@ export default function InfoPanel() {
   return (
     <aside className="info-panel">
       <div className="info-panel-group">
-        <HelpUsGrowSection
-          repoUrl={repoUrl}
-          repoStars={repoStars}
-          repoStarsLoading={repoStarsLoading}
-        />
+        <HelpUsGrowSection />
       </div>
     </aside>
   );

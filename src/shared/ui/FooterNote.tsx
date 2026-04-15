@@ -44,12 +44,7 @@ export default function FooterNote() {
         ) : null}
       </div>
 
-      <div className="desktop-footer-middle">
-        <p className="made-note">
-          MapArt v{appVersion} | © 2026 | Made with{" "}
-          <span className="heart">❤︎</span> in Hannover, Germany
-        </p>
-      </div>
+
 
       <div className="desktop-footer-right">
         <p className="source-note">

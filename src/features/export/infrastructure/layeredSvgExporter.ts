@@ -26,7 +26,6 @@ interface LayeredSvgOptions {
   fontFamily?: string;
   showPosterText: boolean;
   showOverlay: boolean;
-  includeCredits: boolean;
   markers: MarkerItem[];
   markerIcons: MarkerIconDefinition[];
 }
@@ -105,7 +104,6 @@ export async function createLayeredSvgBlobFromMap({
   fontFamily,
   showPosterText,
   showOverlay,
-  includeCredits,
   markers,
   markerIcons,
 }: LayeredSvgOptions): Promise<Blob> {
@@ -260,7 +258,6 @@ export async function createLayeredSvgBlobFromMap({
           fontFamily,
           showPosterText,
           showOverlay,
-          includeCredits,
         );
       }),
     });

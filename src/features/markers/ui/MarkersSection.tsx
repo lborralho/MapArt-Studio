@@ -6,6 +6,7 @@ import type {
   MarkerItem,
 } from "@/features/markers/domain/types";
 import MarkerPicker from "./MarkerPicker";
+import MarkerLocationSearch from "./MarkerLocationSearch";
 import {
   createMarkerItem,
   createUploadedMarkerIcon,
@@ -134,6 +135,7 @@ export default function MarkersSection() {
   const [expandedMarkerId, setExpandedMarkerId] = useState<string | null>(null);
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isLocationSearchOpen, setIsLocationSearchOpen] = useState(false);
   const markerThemeColor = effectiveTheme.ui.text;
   const hasMarkers = markers.length > 0;
   const isColorPickerFocused =
@@ -210,6 +212,25 @@ export default function MarkersSection() {
       });
     },
     [dispatch, form.latitude, form.longitude, mapRef, markerDefaults],
+  );
+
+  const addMarkerAtLocation = useCallback(
+    (lat: number, lon: number) => {
+      dispatch({
+        type: "ADD_MARKER",
+        marker: createMarkerItem({
+          lat,
+          lon,
+          defaults: markerDefaults,
+        }),
+      });
+      // Pan the map to the new marker location using Maplibre's flyTo
+      const map = mapRef.current;
+      if (map) {
+        map.flyTo({ center: [lon, lat], speed: 1.4 });
+      }
+    },
+    [dispatch, mapRef, markerDefaults],
   );
 
   const handleUploadIcon = useCallback(
@@ -435,18 +456,58 @@ export default function MarkersSection() {
 
       <div className="markers-section__content">
         {!isMarkerEditorActive && !isSettingsOpen ? (
-          <MarkerPicker
-            markerColor={markerDefaults.color}
-            customIcons={customMarkerIcons}
-            onIconClick={addMarker}
-            onUploadIcon={handleUploadIcon}
-            onRemoveUploadedIcon={(iconId) =>
-              dispatch({ type: "REMOVE_CUSTOM_MARKER_ICON", iconId })
-            }
-            onClearUploadedIcons={() =>
-              dispatch({ type: "CLEAR_CUSTOM_MARKER_ICONS" })
-            }
-          />
+          <>
+            <MarkerPicker
+              markerColor={markerDefaults.color}
+              customIcons={customMarkerIcons}
+              onIconClick={addMarker}
+              onUploadIcon={handleUploadIcon}
+              onRemoveUploadedIcon={(iconId) =>
+                dispatch({ type: "REMOVE_CUSTOM_MARKER_ICON", iconId })
+              }
+              onClearUploadedIcons={() =>
+                dispatch({ type: "CLEAR_CUSTOM_MARKER_ICONS" })
+              }
+            />
+
+            <div className="marker-location-search-section">
+              <button
+                type="button"
+                className={`marker-location-toggle-btn${isLocationSearchOpen ? " is-active" : ""}`}
+                onClick={() => setIsLocationSearchOpen((prev) => !prev)}
+                aria-expanded={isLocationSearchOpen}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="marker-location-toggle-btn__icon"
+                >
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+                Add Marker by Location
+                <span
+                  className="marker-location-toggle-btn__chevron"
+                  aria-hidden="true"
+                  style={{
+                    transform: isLocationSearchOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                >
+                  ▾
+                </span>
+              </button>
+
+              {isLocationSearchOpen ? (
+                <MarkerLocationSearch
+                  onLocationFound={(lat, lon) => {
+                    addMarkerAtLocation(lat, lon);
+                  }}
+                />
+              ) : null}
+            </div>
+          </>
         ) : null}
 
         {!isMarkerEditorActive && isSettingsOpen ? (

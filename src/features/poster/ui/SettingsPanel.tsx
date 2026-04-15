@@ -67,7 +67,7 @@ export default function SettingsPanel({
     handleLocationSelect,
     handleClearLocation,
     setLocationFocused,
-    handleCreditsChange,
+    setLocationFocused,
   } = useFormHandlers();
   const { locationSuggestions, isLocationSearching, searchNow } = useLocationAutocomplete(
     state.form.location,
@@ -279,7 +279,6 @@ export default function SettingsPanel({
                 form={state.form}
                 onChange={handleChange}
                 fontOptions={FONT_OPTIONS}
-                onCreditsChange={handleCreditsChange}
               />
             ) : null}
           </div>

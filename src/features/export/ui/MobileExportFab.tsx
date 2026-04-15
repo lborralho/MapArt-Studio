@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useExport } from "@/features/export/application/useExport";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { CloseIcon, DownloadIcon, LoaderIcon } from "@/shared/ui/Icons";
-import SupportModal from "@/features/export/ui/SupportModal";
+
 import SocialLinkGroup from "@/shared/ui/SocialLinkGroup";
 
 type ExportFormat = "png" | "pdf" | "svg";
@@ -12,8 +12,6 @@ export default function MobileExportFab() {
     handleDownloadPng,
     handleDownloadPdf,
     handleDownloadSvg,
-    supportPrompt,
-    dismissSupportPrompt,
   } = useExport();
   const { state } = usePosterContext();
   const [isOpen, setIsOpen] = useState(false);
@@ -150,13 +148,7 @@ export default function MobileExportFab() {
         </div>
       ) : null}
 
-      {supportPrompt ? (
-        <SupportModal
-          posterNumber={supportPrompt.posterNumber}
-          onClose={dismissSupportPrompt}
-          titleId="mobile-export-support-modal-title"
-        />
-      ) : null}
+
     </>
   );
 }

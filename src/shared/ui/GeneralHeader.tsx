@@ -23,7 +23,7 @@ export default function GeneralHeader({ onAboutOpen }: GeneralHeaderProps) {
       </div>
 
       <div className="general-header-actions">
-        <SocialLinkGroup variant="header" />
+
         <button
           type="button"
           className="general-header-text-btn general-header-about-text-btn"
