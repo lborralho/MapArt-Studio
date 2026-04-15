@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { captureMapAsCanvas } from "@/features/export/infrastructure/mapExporter";
 import { compositeExport } from "@/features/poster/infrastructure/renderer";
@@ -19,10 +19,6 @@ import {
 } from "@/core/config";
 
 const EXPORT_COUNT_STORAGE_KEY = "mapart.poster.count";
-
-export interface SupportPromptState {
-  posterNumber: number;
-}
 
 function readPosterExportCount(): number {
   if (typeof window === "undefined" || !window.localStorage) {
@@ -65,24 +61,8 @@ function writePosterExportCount(nextCount: number): void {
  */
 export function useExport() {
   const { state, dispatch, effectiveTheme, mapRef } = usePosterContext();
-  const [supportPrompt, setSupportPrompt] = useState<SupportPromptState | null>(
-    null,
-  );
   const { form } = state;
   const hasVisibleMarkers = form.showMarkers && state.markers.length > 0;
-
-  const registerSuccessfulExport = useCallback(() => {
-    const nextCount = readPosterExportCount() + 1;
-    writePosterExportCount(nextCount);
-
-    if (nextCount % 5 === 0) {
-      setSupportPrompt({ posterNumber: nextCount });
-    }
-  }, []);
-
-  const dismissSupportPrompt = useCallback(() => {
-    setSupportPrompt(null);
-  }, []);
 
   const exportPoster = useCallback(
     async (format: "png" | "pdf" | "svg") => {
@@ -225,7 +205,5 @@ export function useExport() {
     handleDownloadPng,
     handleDownloadPdf,
     handleDownloadSvg,
-    supportPrompt,
-    dismissSupportPrompt,
   };
 }
