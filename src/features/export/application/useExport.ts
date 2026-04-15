@@ -18,39 +18,8 @@ import {
   DEFAULT_POSTER_HEIGHT_CM,
 } from "@/core/config";
 
-const EXPORT_COUNT_STORAGE_KEY = "mapart.poster.count";
-
-function readPosterExportCount(): number {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return 0;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(EXPORT_COUNT_STORAGE_KEY);
-    const parsed = Number(raw);
-    if (!Number.isFinite(parsed) || parsed < 0) {
-      return 0;
-    }
-    return Math.floor(parsed);
-  } catch {
-    return 0;
-  }
-}
-
-function writePosterExportCount(nextCount: number): void {
-  if (typeof window === "undefined" || !window.localStorage) {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(EXPORT_COUNT_STORAGE_KEY, String(nextCount));
-  } catch {
-    // Ignore storage write failures (quota/private mode).
-  }
-}
-
 /**
- * Provides handlers for exporting the live poster preview as PNG or PDF.
+ * Provides handlers for exporting the live poster preview as PNG, PDF or SVG.
  *
  * Flow:
  * 1. Resize MapLibre container to full export resolution.
@@ -82,7 +51,7 @@ export function useExport() {
 
         const widthCm = Number(form.width) || DEFAULT_POSTER_WIDTH_CM;
         const heightCm = Number(form.height) || DEFAULT_POSTER_HEIGHT_CM;
-        const dpi = Number(form.dpi) || 300;
+        const dpi = 300;
         const widthInches = widthCm / CM_PER_INCH;
         const heightInches = heightCm / CM_PER_INCH;
 
@@ -114,7 +83,6 @@ export function useExport() {
             "svg",
           );
           triggerDownloadBlob(svgBlob, svgFilename);
-          registerSuccessfulExport();
           dispatch({ type: "FINISH_EXPORT" });
           return;
         }
@@ -167,7 +135,6 @@ export function useExport() {
           triggerDownloadBlob(pngBlob, filename);
         }
 
-        registerSuccessfulExport();
         dispatch({ type: "FINISH_EXPORT" });
       } catch (err) {
         const message = err instanceof Error ? err.message : "Export failed.";
@@ -180,7 +147,6 @@ export function useExport() {
       effectiveTheme,
       dispatch,
       hasVisibleMarkers,
-      registerSuccessfulExport,
       state.markers,
       state.customMarkerIcons,
     ],
