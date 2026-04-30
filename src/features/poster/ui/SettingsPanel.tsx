@@ -14,7 +14,7 @@ import TypographySection from "@/features/poster/ui/TypographySection";
 import {
   LocationIcon,
   ThemeIcon,
-  LayoutIcon,
+  RatioIcon,
   LayersIcon,
   MarkersIcon,
   StyleIcon,
@@ -45,7 +45,7 @@ const accordionSections: {
 }[] = [
   { id: "location", label: "Location", Icon: LocationIcon },
   { id: "theme", label: "Theme", Icon: ThemeIcon },
-  { id: "layout", label: "Layout", Icon: LayoutIcon },
+  { id: "layout", label: "Ratio", Icon: RatioIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
   { id: "markers", label: "Markers", Icon: MarkersIcon },
   { id: "style", label: "Style", Icon: StyleIcon },

@@ -359,11 +359,11 @@ export default function MapSettingsSection({
       </div>
 
       <div className="map-settings-layout-part">
-        <h2>Layout</h2>
+        <h2>Ratio</h2>
         <div className="layout-summary-head">
           <div className="layout-summary-copy">
             <p className="layout-summary-label">
-              LAYOUT:{" "}
+              RATIO:{" "}
               <span className="layout-summary-label-name">
                 {selectedLayoutOption.name}
               </span>
@@ -377,7 +377,7 @@ export default function MapSettingsSection({
               type="button"
               className="theme-customize-btn"
               onClick={handleDoneLayoutEditor}
-              aria-label="Done editing layout"
+              aria-label="Done editing ratio"
             >
               <span className="theme-customize-icon" aria-hidden="true">
                 <CheckIcon />
@@ -388,7 +388,7 @@ export default function MapSettingsSection({
               type="button"
               className="theme-customize-btn"
               onClick={handleOpenLayoutEditor}
-              aria-label="Customize layout size"
+              aria-label="Customize ratio size"
             >
               <span className="theme-customize-icon" aria-hidden="true">
                 <EditIcon />

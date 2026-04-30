@@ -18,7 +18,7 @@ export default function SettingsInfo({
   const rows = [
     { label: "Location", value: location },
     { label: "Theme", value: theme },
-    { label: "Layout", value: layout },
+    { label: "Ratio", value: layout },
     { label: "Poster Size", value: posterSize },
     { label: "Markers", value: markers },
     { label: "Coordinates", value: coordinates },

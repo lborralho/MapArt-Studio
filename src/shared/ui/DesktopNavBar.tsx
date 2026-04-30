@@ -1,7 +1,7 @@
 import {
   LocationIcon,
   ThemeIcon,
-  LayoutIcon,
+  RatioIcon,
   LayersIcon,
   MarkersIcon,
   StyleIcon,
@@ -15,7 +15,7 @@ const tabs: {
   Icon: React.ComponentType<{ className?: string }>;
 }[] = [
   { id: "theme", label: "Theme", Icon: ThemeIcon },
-  { id: "layout", label: "Layout", Icon: LayoutIcon },
+  { id: "layout", label: "Ratio", Icon: RatioIcon },
   { id: "style", label: "Style", Icon: StyleIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
   { id: "markers", label: "Markers", Icon: MarkersIcon },
