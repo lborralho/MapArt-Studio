@@ -3,12 +3,12 @@ import { usePosterContext } from "../ui/PosterContext";
 import { clamp } from "@/shared/geo/math";
 import {
   normalizePosterSizeValue,
-  resolveLayoutIdForSize,
+  resolveRatioIdForSize,
+  formatRatioCm,
 } from "@/features/layout/domain/layoutMatcher";
-import { formatLayoutCm } from "@/features/layout/domain/layoutMatcher";
 import {
-  getLayoutOption,
-  layoutOptions,
+  getRatioOption,
+  ratioOptions,
 } from "@/features/layout/infrastructure/layoutRepository";
 import {
   MIN_POSTER_CM,
@@ -100,21 +100,21 @@ export function useFormHandlers() {
         dispatch({
           type: "SET_FORM_FIELDS",
           fields: {
-            width: formatLayoutCm(nextWidth),
-            height: formatLayoutCm(nextHeight),
-            layout: resolveLayoutIdForSize(
+            width: formatRatioCm(nextWidth),
+            height: formatRatioCm(nextHeight),
+            ratio: resolveRatioIdForSize(
               nextWidth,
               nextHeight,
-              state.form.layout,
+              state.form.ratio,
               LAYOUT_MATCH_TOLERANCE_CM,
-              getLayoutOption(state.form.layout),
-              layoutOptions,
+              getRatioOption(state.form.ratio),
+              ratioOptions,
             ),
           },
         });
       }
     },
-    [dispatch, state.form.width, state.form.height, state.form.layout],
+    [dispatch, state.form.width, state.form.height, state.form.ratio],
   );
 
   const handleThemeChange = useCallback(
@@ -124,16 +124,16 @@ export function useFormHandlers() {
     [dispatch],
   );
 
-  const handleLayoutChange = useCallback(
-    (layoutId: string) => {
-      const layoutOption = getLayoutOption(layoutId);
-      if (!layoutOption) return;
+  const handleRatioChange = useCallback(
+    (ratioId: string) => {
+      const ratioOption = getRatioOption(ratioId);
+      if (!ratioOption) return;
 
       dispatch({
-        type: "SET_LAYOUT",
-        layoutId: layoutOption.id,
-        widthCm: formatLayoutCm(layoutOption.widthCm),
-        heightCm: formatLayoutCm(layoutOption.heightCm),
+        type: "SET_RATIO",
+        ratioId: ratioOption.id,
+        widthCm: formatRatioCm(ratioOption.widthCm),
+        heightCm: formatRatioCm(ratioOption.heightCm),
       });
     },
     [dispatch],
@@ -179,7 +179,7 @@ export function useFormHandlers() {
     handleChange,
     handleNumericFieldBlur,
     handleThemeChange,
-    handleLayoutChange,
+    handleRatioChange,
     handleColorChange,
     handleResetColors,
     handleLocationSelect,

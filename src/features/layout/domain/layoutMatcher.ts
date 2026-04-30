@@ -1,39 +1,39 @@
 import { clamp } from "@/shared/geo/math";
-import { CUSTOM_LAYOUT_ID } from "./types";
-import type { Layout } from "./types";
+import { CUSTOM_RATIO_ID } from "./types";
+import type { PosterRatio } from "./types";
 
-export function matchesLayoutSize(
-  layoutOption: Layout,
+export function matchesRatioSize(
+  ratioOption: PosterRatio,
   widthCm: number,
   heightCm: number,
   toleranceCm: number,
 ): boolean {
   return (
-    Math.abs(layoutOption.widthCm - widthCm) <= toleranceCm &&
-    Math.abs(layoutOption.heightCm - heightCm) <= toleranceCm
+    Math.abs(ratioOption.widthCm - widthCm) <= toleranceCm &&
+    Math.abs(ratioOption.heightCm - heightCm) <= toleranceCm
   );
 }
 
-export function resolveLayoutIdForSize(
+export function resolveRatioIdForSize(
   widthCm: number,
   heightCm: number,
-  currentLayoutId: string,
+  currentRatioId: string,
   toleranceCm: number,
-  currentLayout: Layout | null,
-  allLayouts: Layout[],
+  currentRatio: PosterRatio | null,
+  allRatios: PosterRatio[],
 ): string {
   if (
-    currentLayout &&
-    matchesLayoutSize(currentLayout, widthCm, heightCm, toleranceCm)
+    currentRatio &&
+    matchesRatioSize(currentRatio, widthCm, heightCm, toleranceCm)
   ) {
-    return currentLayout.id;
+    return currentRatio.id;
   }
 
-  const matching = allLayouts.find((lo) =>
-    matchesLayoutSize(lo, widthCm, heightCm, toleranceCm),
+  const matching = allRatios.find((ro) =>
+    matchesRatioSize(ro, widthCm, heightCm, toleranceCm),
   );
 
-  return matching?.id ?? CUSTOM_LAYOUT_ID;
+  return matching?.id ?? CUSTOM_RATIO_ID;
 }
 
 export function normalizePosterSizeValue(
@@ -49,7 +49,22 @@ export function normalizePosterSizeValue(
   return clamp(parsed, minCm, maxCm);
 }
 
-export function formatLayoutCm(value: number): string {
+export function formatRatioCm(value: number): string {
   const rounded = Math.round(Number(value) * 100) / 100;
   return Number.isInteger(rounded) ? String(rounded) : String(rounded);
 }
+
+/**
+ * @deprecated Use `matchesRatioSize` instead.
+ */
+export const matchesLayoutSize = matchesRatioSize;
+
+/**
+ * @deprecated Use `resolveRatioIdForSize` instead.
+ */
+export const resolveLayoutIdForSize = resolveRatioIdForSize;
+
+/**
+ * @deprecated Use `formatRatioCm` instead.
+ */
+export const formatLayoutCm = formatRatioCm;

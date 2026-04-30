@@ -1,32 +1,32 @@
-import LayoutCard from "@/features/layout/ui/LayoutCard";
+import RatioCard from "@/features/layout/ui/LayoutCard";
 import PickerModal from "@/shared/ui/PickerModal";
-import type { LayoutGroup } from "@/features/layout/domain/types";
+import type { PosterRatioGroup } from "@/features/layout/domain/types";
 
 interface MapSettingsPickersProps {
   activePicker: string;
   onClosePicker: () => void;
-  layoutGroups: LayoutGroup[];
-  selectedLayoutId: string;
-  onLayoutSelect: (layoutId: string) => void;
+  ratioGroups: PosterRatioGroup[];
+  selectedRatioId: string;
+  onRatioSelect: (ratioId: string) => void;
 }
 
 export default function MapSettingsPickers({
   activePicker,
   onClosePicker,
-  layoutGroups,
-  selectedLayoutId,
-  onLayoutSelect,
+  ratioGroups,
+  selectedRatioId,
+  onRatioSelect,
 }: MapSettingsPickersProps) {
   return (
     <>
       <PickerModal
         open={activePicker === "layout"}
-        title="Choose Layout"
-        titleId="layout-picker-title"
+        title="Choose Ratio"
+        titleId="ratio-picker-title"
         onClose={onClosePicker}
       >
         <div className="layout-picker-groups">
-          {layoutGroups.map((group) => (
+          {ratioGroups.map((group) => (
             <section
               key={group.id}
               className="layout-picker-group"
@@ -34,12 +34,12 @@ export default function MapSettingsPickers({
             >
               <h4>{group.name}</h4>
               <div className="picker-option-list card-scroll-list">
-                {group.options.map((layoutOption) => (
-                  <LayoutCard
-                    key={layoutOption.id}
-                    layoutOption={layoutOption}
-                    isSelected={layoutOption.id === selectedLayoutId}
-                    onClick={() => onLayoutSelect(layoutOption.id)}
+                {group.options.map((ratioOption) => (
+                  <RatioCard
+                    key={ratioOption.id}
+                    ratioOption={ratioOption}
+                    isSelected={ratioOption.id === selectedRatioId}
+                    onClick={() => onRatioSelect(ratioOption.id)}
                   />
                 ))}
               </div>

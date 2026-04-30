@@ -5,12 +5,14 @@ import {
   LayersIcon,
   MarkersIcon,
   StyleIcon,
+  DesignIcon,
   SettingsIcon,
 } from "./Icons";
 
 export type MobileTab =
   | "location"
   | "theme"
+  | "design"
   | "layout"
   | "style"
   | "layers"
@@ -23,6 +25,7 @@ const tabs: {
 }[] = [
   { id: "location", label: "Location", Icon: LocationIcon },
   { id: "theme", label: "Theme", Icon: ThemeIcon },
+  { id: "design", label: "Design", Icon: DesignIcon },
   { id: "layout", label: "Ratio", Icon: RatioIcon },
   { id: "style", label: "Style", Icon: StyleIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },

@@ -1,0 +1,216 @@
+/* ────── Design Template Types ────── */
+
+/**
+ * Shape used to mask the map within the poster.
+ * - `rect`: Standard rectangular (no mask).
+ * - `circle`: Circular mask centered in the poster.
+ * - `heart`: Heart-shaped SVG path mask.
+ */
+export type DesignMaskShape = "rect" | "circle" | "heart";
+
+/**
+ * Element kinds that a design template can render on top of the map.
+ */
+export type DesignElementType =
+  | "text"
+  | "line"
+  | "divider"
+  | "coordinates"
+  | "text-arc";
+
+/**
+ * Coordinate display format.
+ * - `dms`: degree-minute-second with hemisphere letter.
+ * - `decimal-line`: decimal degrees on a single line ("38.779° N / 9.268° W").
+ * - `decimal-stack`: decimal degrees split onto two lines.
+ */
+export type DesignCoordsFormat = "dms" | "decimal-line" | "decimal-stack";
+
+/**
+ * Decimal precision for coordinate display.
+ */
+export type DesignCoordsPrecision = 3 | 4 | 5;
+
+/**
+ * A single overlay element positioned on the poster.
+ * Coordinates are normalized (0–100) relative to the poster dimensions.
+ */
+export interface DesignElement {
+  /** Unique key for this element within its template. */
+  id: string;
+
+  /** The kind of element. */
+  type: DesignElementType;
+
+  /** Normalized X position (0 = left, 100 = right). */
+  x: number;
+  /** Normalized Y position (0 = top, 100 = bottom). */
+  y: number;
+
+  /** Normalized width (0–100). Used by lines/dividers and to constrain text. */
+  width?: number;
+
+  /**
+   * How the element is anchored relative to (x, y).
+   * Defaults to "center" on both axes.
+   */
+  anchorX?: "left" | "center" | "right";
+  anchorY?: "top" | "center" | "bottom";
+
+  /** Text content or template variable like `{{city}}`. */
+  content?: string;
+
+  /** Font size relative to poster height (percentage). */
+  fontSize?: number;
+
+  /** Font weight (e.g. 300, 400, 700). */
+  fontWeight?: number;
+
+  /** Per-element font family override (defaults to template/global font). */
+  fontFamily?: string;
+
+  /** Italic / normal toggle. */
+  fontStyle?: "normal" | "italic";
+
+  /** Text alignment. */
+  textAlign?: "left" | "center" | "right";
+
+  /** Letter spacing in em units. */
+  letterSpacing?: number;
+
+  /** Text transform. */
+  textTransform?: "none" | "uppercase" | "lowercase";
+
+  /** Line height multiplier (defaults to 1.2). */
+  lineHeight?: number;
+
+  /** Per-element opacity (0–1). */
+  opacity?: number;
+
+  /** Explicit color override (any CSS color). Falls back to theme text color. */
+  color?: string;
+
+  /** Line/divider thickness relative to poster height (percentage). */
+  strokeWidth?: number;
+
+  /**
+   * If true, the user can edit this element's content in the sidebar.
+   * Defaults to false.
+   */
+  editable?: boolean;
+
+  /** Friendly label shown in the override editor (defaults to a humanized id). */
+  editLabel?: string;
+
+  /** Coordinate display format (only relevant for `coordinates`). */
+  coordsFormat?: DesignCoordsFormat;
+
+  /** Decimal precision for `decimal-*` formats. */
+  coordsPrecision?: DesignCoordsPrecision;
+
+  /** Optional separator between lat/lon for `decimal-line`. Defaults to " / ". */
+  coordsSeparator?: string;
+
+  /* ── text-arc only ── */
+
+  /** Arc radius in % of poster min(width,height). */
+  arcRadius?: number;
+
+  /** Arc center X in % (defaults to 50). */
+  arcCenterX?: number;
+
+  /** Arc center Y in % (defaults to 50). */
+  arcCenterY?: number;
+
+  /**
+   * Mid-angle of the arc in degrees, measured clockwise from 12 o'clock.
+   * 0 = top, 90 = right, 180 = bottom, 270 = left. Defaults to 0 (top).
+   */
+  arcMidAngle?: number;
+
+  /** Total angular span of the arc in degrees. Defaults to 120. */
+  arcSpan?: number;
+}
+
+/**
+ * Visual effects applied to the map or mask.
+ */
+export interface DesignEffects {
+  /** Gaussian blur glow around the mask edge (px relative to poster). */
+  glowRadius?: number;
+  /** Glow color (defaults to theme background). */
+  glowColor?: string;
+  /** Drop shadow on the map area. */
+  shadow?: {
+    offsetX: number;
+    offsetY: number;
+    blur: number;
+    color: string;
+  };
+}
+
+/**
+ * Default style overrides for a design template.
+ */
+export interface DesignStyles {
+  /** Default font family for text elements (can be overridden per-element). */
+  fontFamily?: string;
+  /** Whether to use theme text color for all elements. */
+  useThemeTextColor?: boolean;
+  /** Background padding around the map area (0–100 normalized). */
+  mapPadding?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+}
+
+/**
+ * Decorative marker rendered at the visual center of the map area.
+ * Independent from user-added geo markers (those live in the markers feature).
+ */
+export type DesignCenterMarkerType = "none" | "dot" | "ring" | "heart" | "pin";
+
+export interface DesignCenterMarker {
+  type: DesignCenterMarkerType;
+  /** CSS color. Falls back to theme text color when omitted. */
+  color?: string;
+  /** Outer size in % of poster height. Defaults vary by marker type. */
+  size?: number;
+  /** Optional outline for contrast (px relative to poster). */
+  outlineColor?: string;
+  outlineWidth?: number;
+}
+
+/**
+ * A complete design template configuration.
+ * Each template defines how the poster looks: mask shape,
+ * text overlays, and visual effects.
+ */
+export interface DesignTemplate {
+  /** Unique identifier for this design. */
+  id: string;
+  /** Human-readable name shown in the UI. */
+  name: string;
+  /** Short description for the UI. */
+  description: string;
+  /** SVG thumbnail for the design selector (inline SVG string). */
+  thumbnail: string;
+  /** Map mask shape. */
+  mask: DesignMaskShape;
+  /** Overlay elements (text, lines, dividers). */
+  elements: DesignElement[];
+  /** Visual effects (glow, shadow). */
+  effects: DesignEffects;
+  /** Default style configuration. */
+  styles: DesignStyles;
+  /** Optional decorative marker at the visual center of the map. */
+  centerMarker?: DesignCenterMarker;
+}
+
+/**
+ * User overrides for a specific design's editable elements.
+ * Maps element IDs to their overridden content.
+ */
+export type DesignOverrides = Record<string, string>;

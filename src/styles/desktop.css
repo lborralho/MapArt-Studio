@@ -683,6 +683,12 @@
     display: none;
   }
 
+  [data-desktop-tab="design"]
+    .desktop-settings-slide
+    .mobile-section:not(.mobile-section--design) {
+    display: none;
+  }
+
   [data-desktop-tab="layout"]
     .desktop-settings-slide
     .mobile-section:not(.mobile-section--layout-settings) {

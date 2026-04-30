@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createCustomLayoutOption } from "@/features/layout/infrastructure/layoutRepository";
+import { createCustomRatioOption } from "@/features/layout/infrastructure/layoutRepository";
 import {
   DISPLAY_PALETTE_KEYS,
   PALETTE_COLOR_LABELS,
@@ -12,7 +12,7 @@ import {
   buildDynamicColorChoices,
   createFallbackThemeOption,
 } from "@/features/theme/domain/colorSuggestions";
-import LayoutCard from "@/features/layout/ui/LayoutCard";
+import RatioCard from "@/features/layout/ui/LayoutCard";
 import MapDimensionFields from "./MapDimensionFields";
 import ColorPicker from "@/features/theme/ui/ColorPicker";
 import ThemeColorEditor from "@/features/theme/ui/ThemeColorEditor";
@@ -20,7 +20,7 @@ import ThemeSummarySection from "@/features/theme/ui/ThemeSummarySection";
 import { CheckIcon, EditIcon } from "@/shared/ui/Icons";
 import type { PosterForm } from "@/features/poster/application/posterReducer";
 import type { ResolvedTheme } from "@/features/theme/domain/types";
-import type { LayoutGroup } from "@/features/layout/domain/types";
+import type { PosterRatioGroup } from "@/features/layout/domain/types";
 
 const FALLBACK_COLOR = "#000000";
 
@@ -30,10 +30,10 @@ interface MapSettingsSectionProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onNumericFieldBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
   onThemeChange: (themeId: string) => void;
-  onLayoutChange: (layoutId: string) => void;
+  onRatioChange: (ratioId: string) => void;
   selectedTheme: ResolvedTheme;
   themeOptions: ThemeOption[];
-  layoutGroups: LayoutGroup[];
+  ratioGroups: PosterRatioGroup[];
   minPosterCm: number;
   maxPosterCm: number;
   customColors: Record<string, string>;
@@ -48,10 +48,10 @@ export default function MapSettingsSection({
   onChange,
   onNumericFieldBlur,
   onThemeChange,
-  onLayoutChange,
+  onRatioChange,
   selectedTheme,
   themeOptions,
-  layoutGroups,
+  ratioGroups,
   minPosterCm,
   maxPosterCm,
   customColors,
@@ -60,7 +60,7 @@ export default function MapSettingsSection({
   onColorEditorActiveChange,
 }: MapSettingsSectionProps) {
   const [isThemeEditing, setIsThemeEditing] = useState(false);
-  const [isLayoutEditing, setIsLayoutEditing] = useState(false);
+  const [isRatioEditing, setIsRatioEditing] = useState(false);
   const defaultColorKey: ThemeColorKey = DISPLAY_PALETTE_KEYS[0] ?? "ui.bg";
   const [activeColorKey, setActiveColorKey] = useState<ThemeColorKey | null>(
     null,
@@ -71,7 +71,7 @@ export default function MapSettingsSection({
     seedPalette: string[];
   } | null>(null);
   const themeListRef = useRef<HTMLDivElement | null>(null);
-  const layoutGroupsRef = useRef<HTMLDivElement | null>(null);
+  const ratioGroupsRef = useRef<HTMLDivElement | null>(null);
 
   const selectedThemeOption = useMemo(() => {
     const matchingOption = themeOptions.find((t) => t.id === form.theme);
@@ -138,20 +138,20 @@ export default function MapSettingsSection({
     [activeColorKey, customColors, selectedTheme],
   );
 
-  const layoutOptions = useMemo(
-    () => layoutGroups.flatMap((g) => g.options),
-    [layoutGroups],
+  const allRatioOptions = useMemo(
+    () => ratioGroups.flatMap((g) => g.options),
+    [ratioGroups],
   );
 
-  const selectedLayoutOption = useMemo(() => {
-    const match = layoutOptions.find((lo) => lo.id === form.layout);
+  const selectedRatioOption = useMemo(() => {
+    const match = allRatioOptions.find((ro) => ro.id === form.ratio);
     if (match) return match;
-    return createCustomLayoutOption(Number(form.width), Number(form.height));
-  }, [form.height, form.layout, form.width, layoutOptions]);
-  const selectedLayoutDescription =
-    selectedLayoutOption.id === "custom"
-      ? "Your custom layout."
-      : selectedLayoutOption.description?.trim() || "No description available.";
+    return createCustomRatioOption(Number(form.width), Number(form.height));
+  }, [form.height, form.ratio, form.width, allRatioOptions]);
+  const selectedRatioDescription =
+    selectedRatioOption.id === "custom"
+      ? "Your custom ratio."
+      : selectedRatioOption.description?.trim() || "No description available.";
 
   function clearColorPickerState() {
     setActiveColorKey(null);
@@ -163,9 +163,9 @@ export default function MapSettingsSection({
     clearColorPickerState();
   }
 
-  function handleLayoutSelectInline(layoutId: string) {
-    onLayoutChange(layoutId);
-    setIsLayoutEditing(false);
+  function handleRatioSelectInline(ratioId: string) {
+    onRatioChange(ratioId);
+    setIsRatioEditing(false);
   }
 
   function handleSwatchClick(key: ThemeColorKey) {
@@ -190,13 +190,13 @@ export default function MapSettingsSection({
     clearColorPickerState();
   }
 
-  function handleOpenLayoutEditor() {
-    setIsLayoutEditing(true);
-    onLayoutChange("custom");
+  function handleOpenRatioEditor() {
+    setIsRatioEditing(true);
+    onRatioChange("custom");
   }
 
-  function handleDoneLayoutEditor() {
-    setIsLayoutEditing(false);
+  function handleDoneRatioEditor() {
+    setIsRatioEditing(false);
   }
 
   function handleResetThemeColors() {
@@ -270,22 +270,22 @@ export default function MapSettingsSection({
   }, [activeMobileTab]);
 
   useEffect(() => {
-    if (activeMobileTab !== "layout" || isLayoutEditing) {
+    if (activeMobileTab !== "layout" || isRatioEditing) {
       return;
     }
     const frameId = window.requestAnimationFrame(() => {
-      const selectedLayoutCard =
-        layoutGroupsRef.current?.querySelector<HTMLElement>(
+      const selectedRatioCard =
+        ratioGroupsRef.current?.querySelector<HTMLElement>(
           ".layout-card.is-selected",
         );
-      selectedLayoutCard?.scrollIntoView({
+      selectedRatioCard?.scrollIntoView({
         behavior: "auto",
         block: "nearest",
         inline: "start",
       });
     });
     return () => window.cancelAnimationFrame(frameId);
-  }, [activeMobileTab, isLayoutEditing]);
+  }, [activeMobileTab, isRatioEditing]);
 
   const editorKey = activeColorKey || defaultColorKey;
   const editorChoices = activeColorKey
@@ -365,18 +365,18 @@ export default function MapSettingsSection({
             <p className="layout-summary-label">
               RATIO:{" "}
               <span className="layout-summary-label-name">
-                {selectedLayoutOption.name}
+                {selectedRatioOption.name}
               </span>
             </p>
             <p className="layout-summary-description">
-              {selectedLayoutDescription}
+              {selectedRatioDescription}
             </p>
           </div>
-          {isLayoutEditing ? (
+          {isRatioEditing ? (
             <button
               type="button"
               className="theme-customize-btn"
-              onClick={handleDoneLayoutEditor}
+              onClick={handleDoneRatioEditor}
               aria-label="Done editing ratio"
             >
               <span className="theme-customize-icon" aria-hidden="true">
@@ -387,7 +387,7 @@ export default function MapSettingsSection({
             <button
               type="button"
               className="theme-customize-btn"
-              onClick={handleOpenLayoutEditor}
+              onClick={handleOpenRatioEditor}
               aria-label="Customize ratio size"
             >
               <span className="theme-customize-icon" aria-hidden="true">
@@ -397,7 +397,7 @@ export default function MapSettingsSection({
           )}
         </div>
 
-        {isLayoutEditing ? (
+        {isRatioEditing ? (
           <div className="layout-custom-editor">
             <MapDimensionFields
               form={form}
@@ -409,17 +409,17 @@ export default function MapSettingsSection({
             />
           </div>
         ) : (
-          <div className="layout-inline-groups" ref={layoutGroupsRef}>
-            {layoutGroups.map((group) => (
+          <div className="layout-inline-groups" ref={ratioGroupsRef}>
+            {ratioGroups.map((group) => (
               <section key={group.id} className="layout-inline-group">
                 <h3>{group.name}</h3>
                 <div className="layout-inline-list card-scroll-list">
-                  {group.options.map((layoutOption) => (
-                    <LayoutCard
-                      key={layoutOption.id}
-                      layoutOption={layoutOption}
-                      isSelected={layoutOption.id === form.layout}
-                      onClick={() => handleLayoutSelectInline(layoutOption.id)}
+                  {group.options.map((ratioOption) => (
+                    <RatioCard
+                      key={ratioOption.id}
+                      ratioOption={ratioOption}
+                      isSelected={ratioOption.id === form.ratio}
+                      onClick={() => handleRatioSelectInline(ratioOption.id)}
                     />
                   ))}
                 </div>

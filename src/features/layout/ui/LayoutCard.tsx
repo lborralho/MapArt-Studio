@@ -1,8 +1,8 @@
-import type { Layout } from "../domain/types";
-import { formatLayoutDimensions } from "../infrastructure/layoutRepository";
+import type { PosterRatio } from "../domain/types";
+import { formatRatioDimensions } from "../infrastructure/layoutRepository";
 
-function getLayoutSymbolDataUri(layoutOption: Layout): string {
-  const symbol = String(layoutOption?.symbol ?? "").trim();
+function getRatioSymbolDataUri(ratioOption: PosterRatio): string {
+  const symbol = String(ratioOption?.symbol ?? "").trim();
   if (!symbol) return "";
   const normalizedSymbol = symbol.replace(
     /stroke-width=(['"])([\d.]+)\1/g,
@@ -18,25 +18,25 @@ function getLayoutSymbolDataUri(layoutOption: Layout): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(normalizedSymbol)}`;
 }
 
-interface LayoutCardProps {
-  layoutOption: Layout | null;
+interface RatioCardProps {
+  ratioOption: PosterRatio | null;
   onClick?: () => void;
   isSelected?: boolean;
 }
 
-export default function LayoutCard({
-  layoutOption,
+export default function RatioCard({
+  ratioOption,
   onClick,
   isSelected = false,
-}: LayoutCardProps) {
-  if (!layoutOption) {
+}: RatioCardProps) {
+  if (!ratioOption) {
     return null;
   }
   const className = ["layout-card", isSelected ? "is-selected" : ""]
     .filter(Boolean)
     .join(" ");
-  const symbolDataUri = getLayoutSymbolDataUri(layoutOption);
-  const sizeText = formatLayoutDimensions(layoutOption);
+  const symbolDataUri = getRatioSymbolDataUri(ratioOption);
+  const sizeText = formatRatioDimensions(ratioOption);
   const infoText = sizeText;
 
   return (
@@ -47,14 +47,14 @@ export default function LayoutCard({
       aria-pressed={isSelected}
     >
       <div className="layout-card-copy">
-        <p className="layout-card-name">{layoutOption.name}</p>
+        <p className="layout-card-name">{ratioOption.name}</p>
         <p className="layout-card-meta">{infoText}</p>
       </div>
       {symbolDataUri ? (
         <img
           className="layout-card-symbol"
           src={symbolDataUri}
-          alt={`${layoutOption.name} ratio symbol`}
+          alt={`${ratioOption.name} ratio symbol`}
         />
       ) : null}
     </button>

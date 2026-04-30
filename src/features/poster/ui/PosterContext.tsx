@@ -29,9 +29,10 @@ import {
 /* ────── Default form (moved from appConfig) ────── */
 
 import {
-  defaultLayoutId,
-  getLayoutOption,
+  defaultRatioId,
+  getRatioOption,
 } from "@/features/layout/infrastructure/layoutRepository";
+import { defaultDesignId } from "@/features/design/infrastructure/designRepository";
 import { defaultThemeName } from "@/features/theme/infrastructure/themeRepository";
 import {
   DEFAULT_POSTER_WIDTH_CM,
@@ -41,12 +42,12 @@ import {
   DEFAULT_LON,
 } from "@/core/config";
 
-const defaultLayoutOption = getLayoutOption(defaultLayoutId);
-const defaultLayoutWidthCm = Number(
-  defaultLayoutOption?.widthCm ?? DEFAULT_POSTER_WIDTH_CM,
+const defaultRatioOption = getRatioOption(defaultRatioId);
+const defaultRatioWidthCm = Number(
+  defaultRatioOption?.widthCm ?? DEFAULT_POSTER_WIDTH_CM,
 );
-const defaultLayoutHeightCm = Number(
-  defaultLayoutOption?.heightCm ?? DEFAULT_POSTER_HEIGHT_CM,
+const defaultRatioHeightCm = Number(
+  defaultRatioOption?.heightCm ?? DEFAULT_POSTER_HEIGHT_CM,
 );
 const DEFAULT_LOCATION_LABEL =
   "Hanover, Region Hannover, Lower Saxony, Germany";
@@ -56,10 +57,10 @@ export const DEFAULT_FORM: PosterForm = {
   latitude: DEFAULT_LAT.toFixed(6),
   longitude: DEFAULT_LON.toFixed(6),
   distance: String(DEFAULT_DISTANCE_METERS),
-  width: String(defaultLayoutWidthCm),
-  height: String(defaultLayoutHeightCm),
+  width: String(defaultRatioWidthCm),
+  height: String(defaultRatioHeightCm),
   theme: defaultThemeName,
-  layout: defaultLayoutId,
+  ratio: defaultRatioId,
   displayCity: "Hanover",
   displayCountry: "Germany",
   displayContinent: "Europe",
@@ -75,6 +76,7 @@ export const DEFAULT_FORM: PosterForm = {
   includeRoadMinorLow: true,
   includeRoadOutline: true,
   showMarkers: true,
+  designId: defaultDesignId,
 };
 
 const INITIAL_STATE: PosterState = {
@@ -97,6 +99,7 @@ const INITIAL_STATE: PosterState = {
     city: false,
     country: false,
   },
+  designOverrides: {},
 };
 
 /* ────── Context shape ────── */

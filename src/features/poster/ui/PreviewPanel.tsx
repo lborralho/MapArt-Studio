@@ -11,6 +11,7 @@ import MapPreview from "@/features/map/ui/MapPreview";
 import MarkerOverlay from "@/features/markers/ui/MarkerOverlay";
 import GradientFades from "./GradientFades";
 import PosterTextOverlay from "./PosterTextOverlay";
+import DesignRenderer from "@/features/design/ui/DesignRenderer";
 import SettingsInfo from "./SettingsInfo";
 import MapPrimaryControls from "./MapPrimaryControls";
 import {
@@ -36,9 +37,9 @@ import {
 } from "@/core/config";
 import { ensureGoogleFont, reverseGeocodeCoordinates } from "@/core/services";
 import {
-  createCustomLayoutOption,
-  formatLayoutDimensions,
-  getLayoutOption,
+  createCustomRatioOption,
+  formatRatioDimensions,
+  getRatioOption,
 } from "@/features/layout/infrastructure/layoutRepository";
 
 const LOCKED_HINT = "Map is locked to prevent unintended movement.";
@@ -60,6 +61,7 @@ export default function PreviewPanel() {
     activeMarkerId,
   } = state;
   const hasVisibleMarkers = form.showMarkers && state.markers.length > 0;
+  const isDesignActive = form.designId !== "classic";
   const {
     mapCenter,
     mapZoom,
@@ -166,15 +168,15 @@ export default function PreviewPanel() {
   const aspect = widthCm / heightCm;
   const formLat = Number(form.latitude) || 0;
   const formLon = Number(form.longitude) || 0;
-  const layoutOption =
-    getLayoutOption(form.layout) ?? createCustomLayoutOption(widthCm, heightCm);
-  const posterSizeLabel = formatLayoutDimensions(layoutOption);
-  const layoutLabel = `${layoutOption.name} (${formatLayoutDimensions(layoutOption)})`;
+  const ratioOption =
+    getRatioOption(form.ratio) ?? createCustomRatioOption(widthCm, heightCm);
+  const posterSizeLabel = formatRatioDimensions(ratioOption);
+  const ratioLabel = `${ratioOption.name} (${formatRatioDimensions(ratioOption)})`;
   const infoLocationLabel =
     [form.displayCity, form.displayCountry].filter(Boolean).join(", ") ||
     form.location ||
     DEFAULT_LOCATION_LABEL;
-  const infoLayoutLabel = layoutOption.name;
+  const infoRatioLabel = ratioOption.name;
   const markerCount = state.markers.length;
   const markersLabel = `${markerCount} marker${markerCount === 1 ? "" : "s"}`;
   const coordinatesLabel = `${formLat.toFixed(4)}, ${formLon.toFixed(4)}`;
@@ -395,7 +397,7 @@ export default function PreviewPanel() {
           </div>
         </div>
         <div className="desktop-layout-label" aria-hidden="true">
-          {layoutLabel}
+          {ratioLabel}
         </div>
         <div
           ref={frameRef}
@@ -407,44 +409,89 @@ export default function PreviewPanel() {
             } as CSSProperties
           }
         >
-          <MapPreview
-            style={mapStyle}
-            center={mapCenter}
-            zoom={mapZoom}
-            mapRef={mapRef}
-            interactive={isEditing && !isMarkerEditorActive}
-            allowRotation={isEditing && isRotationEnabled}
-            minZoom={mapMinZoom}
-            maxZoom={mapMaxZoom}
-            overzoomScale={MAP_OVERZOOM_SCALE}
-            onMove={handleMove}
-            onMoveEnd={handleMoveEnd}
-          />
-          {form.showMarkers ? (
-            <GradientFades color={effectiveTheme.ui.bg} />
-          ) : null}
-          {hasVisibleMarkers ? (
-            <MarkerOverlay
-              markers={state.markers}
-              customIcons={state.customMarkerIcons}
-              mapRef={mapRef}
-              isMarkerEditMode={isMarkerEditorActive}
-              activeMarkerId={activeMarkerId}
-              onActiveMarkerChange={handleMarkerActiveChange}
-              onMarkerPositionChange={handleMarkerPositionChange}
-              onMarkerSizeChange={handleMarkerSizeChange}
-            />
-          ) : null}
-          <PosterTextOverlay
-            city={cityLabel}
-            country={countryLabel}
-            lat={formLat}
-            lon={formLon}
-            fontFamily={form.fontFamily}
-            textColor={effectiveTheme.ui.text}
-            showPosterText={form.showPosterText}
-            showOverlay={form.showMarkers}
-          />
+          {isDesignActive ? (
+            <DesignRenderer
+              designId={form.designId}
+              overrides={state.designOverrides}
+              width={frameRef.current?.clientWidth ?? 400}
+              height={frameRef.current?.clientHeight ?? 600}
+              lat={formLat}
+              lon={formLon}
+              city={cityLabel}
+              country={countryLabel}
+              textColor={effectiveTheme.ui.text}
+              bgColor={effectiveTheme.ui.bg}
+              fontFamily={form.fontFamily}
+              showText={form.showPosterText}
+            >
+              <MapPreview
+                style={mapStyle}
+                center={mapCenter}
+                zoom={mapZoom}
+                mapRef={mapRef}
+                interactive={isEditing && !isMarkerEditorActive}
+                allowRotation={isEditing && isRotationEnabled}
+                minZoom={mapMinZoom}
+                maxZoom={mapMaxZoom}
+                overzoomScale={MAP_OVERZOOM_SCALE}
+                onMove={handleMove}
+                onMoveEnd={handleMoveEnd}
+              />
+              {hasVisibleMarkers ? (
+                <MarkerOverlay
+                  markers={state.markers}
+                  customIcons={state.customMarkerIcons}
+                  mapRef={mapRef}
+                  isMarkerEditMode={isMarkerEditorActive}
+                  activeMarkerId={activeMarkerId}
+                  onActiveMarkerChange={handleMarkerActiveChange}
+                  onMarkerPositionChange={handleMarkerPositionChange}
+                  onMarkerSizeChange={handleMarkerSizeChange}
+                />
+              ) : null}
+            </DesignRenderer>
+          ) : (
+            <>
+              <MapPreview
+                style={mapStyle}
+                center={mapCenter}
+                zoom={mapZoom}
+                mapRef={mapRef}
+                interactive={isEditing && !isMarkerEditorActive}
+                allowRotation={isEditing && isRotationEnabled}
+                minZoom={mapMinZoom}
+                maxZoom={mapMaxZoom}
+                overzoomScale={MAP_OVERZOOM_SCALE}
+                onMove={handleMove}
+                onMoveEnd={handleMoveEnd}
+              />
+              {form.showMarkers ? (
+                <GradientFades color={effectiveTheme.ui.bg} />
+              ) : null}
+              {hasVisibleMarkers ? (
+                <MarkerOverlay
+                  markers={state.markers}
+                  customIcons={state.customMarkerIcons}
+                  mapRef={mapRef}
+                  isMarkerEditMode={isMarkerEditorActive}
+                  activeMarkerId={activeMarkerId}
+                  onActiveMarkerChange={handleMarkerActiveChange}
+                  onMarkerPositionChange={handleMarkerPositionChange}
+                  onMarkerSizeChange={handleMarkerSizeChange}
+                />
+              ) : null}
+              <PosterTextOverlay
+                city={cityLabel}
+                country={countryLabel}
+                lat={formLat}
+                lon={formLon}
+                fontFamily={form.fontFamily}
+                textColor={effectiveTheme.ui.text}
+                showPosterText={form.showPosterText}
+                showOverlay={form.showMarkers}
+              />
+            </>
+          )}
 
           <div className="map-controls" aria-label="Map controls">
             {!isEditing ? (
@@ -575,7 +622,7 @@ export default function PreviewPanel() {
       <SettingsInfo
         location={infoLocationLabel}
         theme={effectiveTheme.name}
-        layout={infoLayoutLabel}
+        layout={infoRatioLabel}
         posterSize={posterSizeLabel}
         markers={markersLabel}
         coordinates={coordinatesLabel}

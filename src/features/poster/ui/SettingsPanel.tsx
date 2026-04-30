@@ -18,21 +18,26 @@ import {
   LayersIcon,
   MarkersIcon,
   StyleIcon,
+  DesignIcon,
   ChevronDownIcon,
 } from "@/shared/ui/Icons";
 
 import { themeOptions } from "@/features/theme/infrastructure/themeRepository";
-import { layoutGroups } from "@/features/layout/infrastructure/layoutRepository";
+import { ratioGroups } from "@/features/layout/infrastructure/layoutRepository";
 import {
   MIN_POSTER_CM,
   MAX_POSTER_CM,
   FONT_OPTIONS,
 } from "@/core/config";
 import type { SearchResult } from "@/features/location/domain/types";
+import { designOptions } from "@/features/design/infrastructure/designRepository";
+import { getDesignTemplate } from "@/features/design/infrastructure/designRepository";
+import DesignCard from "@/features/design/ui/DesignCard";
 
 type SectionId =
   | "location"
   | "theme"
+  | "design"
   | "layout"
   | "layers"
   | "markers"
@@ -45,6 +50,7 @@ const accordionSections: {
 }[] = [
   { id: "location", label: "Location", Icon: LocationIcon },
   { id: "theme", label: "Theme", Icon: ThemeIcon },
+  { id: "design", label: "Design", Icon: DesignIcon },
   { id: "layout", label: "Ratio", Icon: RatioIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
   { id: "markers", label: "Markers", Icon: MarkersIcon },
@@ -56,12 +62,12 @@ export default function SettingsPanel({
 }: {
   mobileTab?: MobileTab;
 }) {
-  const { state, selectedTheme } = usePosterContext();
+  const { state, dispatch, selectedTheme } = usePosterContext();
   const {
     handleChange,
     handleNumericFieldBlur,
     handleThemeChange,
-    handleLayoutChange,
+    handleRatioChange,
     handleColorChange,
     handleResetColors,
     handleLocationSelect,
@@ -78,7 +84,7 @@ export default function SettingsPanel({
 
   const [isColorEditorActive, setIsColorEditorActive] = useState(false);
   const [openSections, setOpenSections] = useState<Set<SectionId>>(
-    new Set(["location", "theme", "layout", "style"]),
+    new Set(["location", "theme", "design", "layout", "style"]),
   );
 
   const isAuxEditorActive = isColorEditorActive;
@@ -160,10 +166,10 @@ export default function SettingsPanel({
                 onChange={handleChange}
                 onNumericFieldBlur={handleNumericFieldBlur}
                 onThemeChange={handleThemeChange}
-                onLayoutChange={handleLayoutChange}
+                onRatioChange={handleRatioChange}
                 selectedTheme={selectedTheme}
                 themeOptions={themeOptions}
-                layoutGroups={layoutGroups}
+                ratioGroups={ratioGroups}
                 minPosterCm={MIN_POSTER_CM}
                 maxPosterCm={MAX_POSTER_CM}
                 customColors={state.customColors}
@@ -181,8 +187,8 @@ export default function SettingsPanel({
       >
         <AccordionHeader
           sectionId="layout"
-          label={accordionSections[2].label}
-          Icon={accordionSections[2].Icon}
+          label={accordionSections[3].label}
+          Icon={accordionSections[3].Icon}
           isOpen={openSections.has("layout")}
           onToggle={toggleSection}
         />
@@ -197,10 +203,10 @@ export default function SettingsPanel({
                 onChange={handleChange}
                 onNumericFieldBlur={handleNumericFieldBlur}
                 onThemeChange={handleThemeChange}
-                onLayoutChange={handleLayoutChange}
+                onRatioChange={handleRatioChange}
                 selectedTheme={selectedTheme}
                 themeOptions={themeOptions}
-                layoutGroups={layoutGroups}
+                ratioGroups={ratioGroups}
                 minPosterCm={MIN_POSTER_CM}
                 maxPosterCm={MAX_POSTER_CM}
                 customColors={state.customColors}
@@ -214,12 +220,83 @@ export default function SettingsPanel({
       </div>
 
       <div
+        className={`mobile-section mobile-section--design accordion-item${openSections.has("design") ? " accordion-item--open" : ""}`}
+      >
+        <AccordionHeader
+          sectionId="design"
+          label={accordionSections.find((s) => s.id === "design")!.label}
+          Icon={accordionSections.find((s) => s.id === "design")!.Icon}
+          isOpen={openSections.has("design")}
+          onToggle={toggleSection}
+        />
+        <div
+          className={`accordion-body${openSections.has("design") ? " is-open" : ""}`}
+        >
+          <div className="accordion-body-inner">
+            {!isColorEditorActive ? (
+              <section className="panel-block">
+                <h2>Design Template</h2>
+                <div className="design-template-list card-scroll-list">
+                  {designOptions.map((design) => (
+                    <DesignCard
+                      key={design.id}
+                      design={design}
+                      isSelected={design.id === state.form.designId}
+                      onClick={() =>
+                        dispatch({ type: "SET_DESIGN", designId: design.id })
+                      }
+                    />
+                  ))}
+                </div>
+                {state.form.designId !== "classic" ? (
+                  <div className="design-text-overrides">
+                    <h3>Customize Text</h3>
+                    {getDesignTemplate(state.form.designId)
+                      .elements.filter(
+                        (el) =>
+                          el.editable &&
+                          (el.type === "text" || el.type === "text-arc"),
+                      )
+                      .map((el) => {
+                        const label =
+                          el.editLabel ??
+                          el.id.charAt(0).toUpperCase() + el.id.slice(1);
+                        const placeholder =
+                          el.content?.replace(/\{\{(\w+)\}\}/g, (_, k) => k) ?? "";
+                        return (
+                          <label key={el.id} className="design-text-field">
+                            <span className="design-text-field-label">{label}</span>
+                            <input
+                              type="text"
+                              className="design-text-field-input"
+                              placeholder={placeholder}
+                              value={state.designOverrides[el.id] ?? ""}
+                              onChange={(e) =>
+                                dispatch({
+                                  type: "SET_DESIGN_OVERRIDE",
+                                  elementId: el.id,
+                                  content: e.target.value,
+                                })
+                              }
+                            />
+                          </label>
+                        );
+                      })}
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div
         className={`mobile-section mobile-section--layers accordion-item${openSections.has("layers") ? " accordion-item--open" : ""}`}
       >
         <AccordionHeader
           sectionId="layers"
-          label={accordionSections[3].label}
-          Icon={accordionSections[3].Icon}
+          label={accordionSections[4].label}
+          Icon={accordionSections[4].Icon}
           isOpen={openSections.has("layers")}
           onToggle={toggleSection}
         />
@@ -245,8 +322,8 @@ export default function SettingsPanel({
       >
         <AccordionHeader
           sectionId="markers"
-          label={accordionSections[4].label}
-          Icon={accordionSections[4].Icon}
+          label={accordionSections[5].label}
+          Icon={accordionSections[5].Icon}
           isOpen={openSections.has("markers")}
           onToggle={toggleSection}
         />
@@ -264,8 +341,8 @@ export default function SettingsPanel({
       >
         <AccordionHeader
           sectionId="style"
-          label={accordionSections[5].label}
-          Icon={accordionSections[5].Icon}
+          label={accordionSections[6].label}
+          Icon={accordionSections[6].Icon}
           isOpen={openSections.has("style")}
           onToggle={toggleSection}
         />

@@ -1,11 +1,11 @@
 import layoutsManifest from "@/data/layouts.json";
 import { toPositiveNumber } from "@/shared/utils/number";
-import type { Layout, LayoutGroup } from "../domain/types";
+import type { PosterRatio, PosterRatioGroup } from "../domain/types";
 
 const fallbackSymbol =
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'><rect x='2' y='2' width='60' height='36' rx='5' fill='none' stroke='#9CC3DA' stroke-width='2'/><rect x='14' y='8' width='36' height='24' rx='3' fill='#4B91B7'/></svg>";
 
-const fallbackLayout: Layout = {
+const fallbackRatio: PosterRatio = {
   id: "print_poster_20x30",
   name: "Poster 20 x 30 cm",
   description: "Classic portrait poster size (2:3 ratio).",
@@ -54,29 +54,29 @@ function createSymbolFromRatio(width: number, height: number): string {
   return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'><rect x='2' y='2' width='60' height='36' rx='5' fill='none' stroke='#9CC3DA' stroke-width='2'/><rect x='${roundedX}' y='${roundedY}' width='${roundedWidth}' height='${roundedHeight}' rx='3' fill='#4B91B7'/></svg>`;
 }
 
-function normalizeLayout(
+function normalizeRatio(
   category: { id: string; name: string },
   layout: any,
   fallbackIdSuffix: string | number,
-): Layout {
-  const width = toPositiveNumber(layout?.width, fallbackLayout.width);
-  const height = toPositiveNumber(layout?.height, fallbackLayout.height);
+): PosterRatio {
+  const width = toPositiveNumber(layout?.width, fallbackRatio.width);
+  const height = toPositiveNumber(layout?.height, fallbackRatio.height);
   const unit = normalizeUnit(layout?.unit);
 
   const widthCm = toPositiveNumber(
     layout?.posterWidthCm,
-    unit === "cm" ? width : fallbackLayout.widthCm,
+    unit === "cm" ? width : fallbackRatio.widthCm,
   );
   const heightCm = toPositiveNumber(
     layout?.posterHeightCm,
-    unit === "cm" ? height : fallbackLayout.heightCm,
+    unit === "cm" ? height : fallbackRatio.heightCm,
   );
 
   const rawSymbol = String(layout?.symbol ?? "").trim();
 
   return {
     id: String(layout?.id ?? `${category.id}_${fallbackIdSuffix}`),
-    name: String(layout?.name ?? "Unnamed Layout"),
+    name: String(layout?.name ?? "Unnamed Ratio"),
     description: String(layout?.description ?? "").trim(),
     width,
     height,
@@ -93,13 +93,13 @@ const rawCategories = Array.isArray((layoutsManifest as any)?.categories)
   ? (layoutsManifest as any).categories
   : [];
 
-export const layoutGroups: LayoutGroup[] = rawCategories
+export const ratioGroups: PosterRatioGroup[] = rawCategories
   .map((category: any, categoryIndex: number) => {
     const categoryId = String(category?.id ?? `category_${categoryIndex}`);
     const categoryName = String(category?.name ?? categoryId);
     const rawLayouts = Array.isArray(category?.layouts) ? category.layouts : [];
     const options = rawLayouts.map((layout: any, layoutIndex: number) =>
-      normalizeLayout(
+      normalizeRatio(
         { id: categoryId, name: categoryName },
         layout,
         layoutIndex,
@@ -108,14 +108,14 @@ export const layoutGroups: LayoutGroup[] = rawCategories
 
     return { id: categoryId, name: categoryName, options };
   })
-  .filter((group: LayoutGroup) => group.options.length > 0);
+  .filter((group: PosterRatioGroup) => group.options.length > 0);
 
-export const layoutOptions: Layout[] = layoutGroups.flatMap(
+export const ratioOptions: PosterRatio[] = ratioGroups.flatMap(
   (group) => group.options,
 );
 
-const layoutOptionsById: Record<string, Layout> = layoutOptions.reduce(
-  (acc: Record<string, Layout>, option) => {
+const ratioOptionsById: Record<string, PosterRatio> = ratioOptions.reduce(
+  (acc: Record<string, PosterRatio>, option) => {
     if (!acc[option.id]) acc[option.id] = option;
     return acc;
   },
@@ -126,38 +126,38 @@ const manifestDefaultId = String(
   (layoutsManifest as any)?.defaultLayoutId ?? "",
 ).trim();
 
-export const defaultLayoutId: string = layoutOptionsById[manifestDefaultId]
+export const defaultRatioId: string = ratioOptionsById[manifestDefaultId]
   ? manifestDefaultId
-  : (layoutOptions[0]?.id ?? fallbackLayout.id);
+  : (ratioOptions[0]?.id ?? fallbackRatio.id);
 
-export function formatLayoutDimensions(layoutOption: Layout): string {
-  if (!layoutOption) return "";
-  return `${formatDecimal(layoutOption.width)} x ${formatDecimal(layoutOption.height)} ${layoutOption.unit}`;
+export function formatRatioDimensions(ratioOption: PosterRatio): string {
+  if (!ratioOption) return "";
+  return `${formatDecimal(ratioOption.width)} x ${formatDecimal(ratioOption.height)} ${ratioOption.unit}`;
 }
 
-export function getLayoutOption(layoutId: string): Layout | null {
-  const normalizedId = String(layoutId ?? "").trim();
+export function getRatioOption(ratioId: string): PosterRatio | null {
+  const normalizedId = String(ratioId ?? "").trim();
   if (normalizedId === "custom") return null;
-  if (layoutOptionsById[normalizedId]) return layoutOptionsById[normalizedId];
-  if (layoutOptionsById[defaultLayoutId])
-    return layoutOptionsById[defaultLayoutId];
-  return fallbackLayout;
+  if (ratioOptionsById[normalizedId]) return ratioOptionsById[normalizedId];
+  if (ratioOptionsById[defaultRatioId])
+    return ratioOptionsById[defaultRatioId];
+  return fallbackRatio;
 }
 
-export function createCustomLayoutOption(
+export function createCustomRatioOption(
   widthCm: number,
   heightCm: number,
-): Layout {
-  const normalizedWidthCm = toPositiveNumber(widthCm, fallbackLayout.widthCm);
+): PosterRatio {
+  const normalizedWidthCm = toPositiveNumber(widthCm, fallbackRatio.widthCm);
   const normalizedHeightCm = toPositiveNumber(
     heightCm,
-    fallbackLayout.heightCm,
+    fallbackRatio.heightCm,
   );
   const symbol = createSymbolFromRatio(normalizedWidthCm, normalizedHeightCm);
 
   return {
     id: "custom",
-    name: "Custom Layout",
+    name: "Custom Ratio",
     description: "Manual width and height values.",
     width: normalizedWidthCm,
     height: normalizedHeightCm,
@@ -169,3 +169,18 @@ export function createCustomLayoutOption(
     categoryName: "Custom",
   };
 }
+
+/* ────── Deprecated aliases (backward-compat) ────── */
+
+/** @deprecated Use `ratioGroups` */
+export const layoutGroups = ratioGroups;
+/** @deprecated Use `ratioOptions` */
+export const layoutOptions = ratioOptions;
+/** @deprecated Use `defaultRatioId` */
+export const defaultLayoutId = defaultRatioId;
+/** @deprecated Use `formatRatioDimensions` */
+export const formatLayoutDimensions = formatRatioDimensions;
+/** @deprecated Use `getRatioOption` */
+export const getLayoutOption = getRatioOption;
+/** @deprecated Use `createCustomRatioOption` */
+export const createCustomLayoutOption = createCustomRatioOption;

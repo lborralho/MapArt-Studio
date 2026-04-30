@@ -4,6 +4,7 @@ import type {
   MarkerIconDefinition,
   MarkerItem,
 } from "@/features/markers/domain/types";
+import type { DesignOverrides } from "@/features/design/domain/types";
 import {
   MAX_MARKER_SIZE,
   MIN_MARKER_SIZE,
@@ -22,7 +23,7 @@ export interface PosterForm {
   width: string;
   height: string;
   theme: string;
-  layout: string;
+  ratio: string;
   displayCity: string;
   displayCountry: string;
   displayContinent: string;
@@ -38,6 +39,7 @@ export interface PosterForm {
   includeRoadMinorLow: boolean;
   includeRoadOutline: boolean;
   showMarkers: boolean;
+  designId: string;
 }
 
 /* ────── App-level state ────── */
@@ -59,6 +61,7 @@ export interface PosterState {
     city: boolean;
     country: boolean;
   };
+  designOverrides: DesignOverrides;
 }
 
 /* ────── Actions ────── */
@@ -71,7 +74,7 @@ export type PosterAction =
       resetDisplayNameOverrides?: boolean;
     }
   | { type: "SET_THEME"; themeId: string }
-  | { type: "SET_LAYOUT"; layoutId: string; widthCm: string; heightCm: string }
+  | { type: "SET_RATIO"; ratioId: string; widthCm: string; heightCm: string }
   | { type: "SET_COLOR"; key: string; value: string }
   | { type: "RESET_COLORS" }
   | { type: "SELECT_LOCATION"; location: SearchResult }
@@ -97,7 +100,10 @@ export type PosterAction =
       defaults: Partial<MarkerDefaults>;
       applyToMarkers?: boolean;
     }
-  | { type: "RESET_MARKER_DEFAULTS" };
+  | { type: "RESET_MARKER_DEFAULTS" }
+  | { type: "SET_DESIGN"; designId: string }
+  | { type: "SET_DESIGN_OVERRIDE"; elementId: string; content: string }
+  | { type: "RESET_DESIGN_OVERRIDES" };
 
 /* ────── Reducer ────── */
 
@@ -155,12 +161,12 @@ export function posterReducer(
         customColors: {},
       };
 
-    case "SET_LAYOUT":
+    case "SET_RATIO":
       return {
         ...state,
         form: {
           ...state.form,
-          layout: action.layoutId,
+          ratio: action.ratioId,
           width: action.widthCm,
           height: action.heightCm,
         },
@@ -367,6 +373,28 @@ export function posterReducer(
         })),
       };
     }
+
+    case "SET_DESIGN":
+      return {
+        ...state,
+        form: { ...state.form, designId: action.designId },
+        designOverrides: {},
+      };
+
+    case "SET_DESIGN_OVERRIDE":
+      return {
+        ...state,
+        designOverrides: {
+          ...state.designOverrides,
+          [action.elementId]: action.content,
+        },
+      };
+
+    case "RESET_DESIGN_OVERRIDES":
+      return {
+        ...state,
+        designOverrides: {},
+      };
 
     default:
       return state;

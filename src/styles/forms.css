@@ -1121,6 +1121,176 @@ button.color-editor-target:focus-visible {
   color: #b9cfde;
 }
 
+/* ────── Design Card ────── */
+
+.design-card {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  border: 1px solid rgba(151, 183, 207, 0.28);
+  border-radius: 14px;
+  background: rgba(9, 18, 27, 0.86);
+  overflow: hidden;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+  cursor: pointer;
+}
+
+.design-card.is-selected {
+  border-color: rgba(112, 184, 222, 0.85);
+  box-shadow:
+    0 0 0 2px rgba(75, 149, 186, 0.28),
+    0 8px 22px rgba(0, 0, 0, 0.35);
+  background: rgba(20, 38, 52, 0.94);
+}
+
+.design-card:not(.is-selected):not(:disabled):hover,
+.design-card:not(.is-selected):focus-visible {
+  border-color: rgba(151, 183, 207, 0.55);
+  background: rgba(13, 25, 36, 0.92);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+}
+
+.design-card-thumbnail {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  display: block;
+  padding: 10px 12px 6px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.design-card-thumbnail--empty {
+  background: rgba(20, 38, 52, 0.5);
+}
+
+.design-card-copy {
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-top: 1px solid rgba(151, 183, 207, 0.12);
+}
+
+.design-card-name {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #e7f2fb;
+}
+
+.design-card-meta {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: #9fbcd0;
+}
+
+.design-template-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (min-width: 480px) {
+  .design-template-list {
+    gap: 12px;
+  }
+}
+
+/* ── Design text override fields ── */
+
+.design-text-overrides {
+  margin-top: 8px;
+  display: grid;
+  gap: 10px;
+}
+
+.design-text-overrides h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #a8bfd1;
+}
+
+.design-text-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.design-text-field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8ab0c6;
+  letter-spacing: 0.02em;
+}
+
+.design-text-field-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(151, 183, 207, 0.34);
+  border-radius: 8px;
+  background: rgba(12, 23, 34, 0.9);
+  color: #e6f2fb;
+  font-size: 0.84rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.design-text-field-input::placeholder {
+  color: rgba(168, 191, 209, 0.45);
+}
+
+.design-text-field-input:focus {
+  outline: none;
+  border-color: rgba(112, 184, 222, 0.7);
+  box-shadow: 0 0 0 2px rgba(75, 149, 186, 0.18);
+}
+
+/* ── Design renderer ── */
+
+.design-renderer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.design-map-area {
+  position: absolute;
+  overflow: hidden;
+}
+
+.design-map-area > * {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.design-element {
+  z-index: 2;
+  pointer-events: none;
+}
+
+
 .picker-modal-backdrop {
   position: fixed;
   inset: 0;

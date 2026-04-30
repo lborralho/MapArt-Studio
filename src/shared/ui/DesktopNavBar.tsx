@@ -5,6 +5,7 @@ import {
   LayersIcon,
   MarkersIcon,
   StyleIcon,
+  DesignIcon,
   SettingsIcon,
 } from "./Icons";
 import type { MobileTab } from "./MobileNavBar";
@@ -15,6 +16,7 @@ const tabs: {
   Icon: React.ComponentType<{ className?: string }>;
 }[] = [
   { id: "theme", label: "Theme", Icon: ThemeIcon },
+  { id: "design", label: "Design", Icon: DesignIcon },
   { id: "layout", label: "Ratio", Icon: RatioIcon },
   { id: "style", label: "Style", Icon: StyleIcon },
   { id: "layers", label: "Layers", Icon: LayersIcon },
