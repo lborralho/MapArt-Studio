@@ -5,7 +5,7 @@ import { compositeExport } from "@/features/poster/infrastructure/renderer";
 import { resolveCanvasSize } from "@/features/poster/infrastructure/renderer/canvas";
 import { getAllMarkerIcons } from "@/features/markers/infrastructure/iconRegistry";
 import { ensureGoogleFont } from "@/core/services";
-import { resolveDesignElements } from "@/features/design/infrastructure/canvasRenderer";
+import { resolveDesignElements, computeMaskCaptureInfo } from "@/features/design/infrastructure/canvasRenderer";
 import {
   createPngBlob,
   createPdfBlobFromCanvas,
@@ -101,14 +101,23 @@ export function useExport() {
           return;
         }
 
-        // 1. Capture map at full export resolution
+        // 1. Capture map — at mask dimensions for non-classic designs to avoid
+        //    aspect-ratio distortion when the mask area isn't full-poster size.
+        const isNonClassic =
+          Boolean(form.designId) && form.designId !== "classic";
+        const maskInfo = isNonClassic
+          ? computeMaskCaptureInfo(form.designId, size.width, size.height)
+          : null;
+        const capWidth = maskInfo?.capWidth ?? size.width;
+        const capHeight = maskInfo?.capHeight ?? size.height;
+
         const {
           canvas: mapCanvas,
           markerProjection,
           markerScaleX,
           markerScaleY,
           markerSizeScale,
-        } = await captureMapAsCanvas(map, size.width, size.height);
+        } = await captureMapAsCanvas(map, capWidth, capHeight);
 
         // 2. Composite fades + text
         const { canvas } = await compositeExport(mapCanvas, {
@@ -133,6 +142,10 @@ export function useExport() {
           designElements: getResolvedDesignElements(),
           designId: form.designId,
           bgColor: state.designBgColor ?? effectiveTheme.ui.bg,
+          exportWidth: size.width,
+          exportHeight: size.height,
+          mapOffsetX: maskInfo?.offsetX ?? 0,
+          mapOffsetY: maskInfo?.offsetY ?? 0,
         });
 
         // 3. Download

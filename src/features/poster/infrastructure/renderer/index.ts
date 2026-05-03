@@ -53,13 +53,17 @@ export async function compositeExport(
     designElements,
     designId,
     bgColor,
+    exportWidth,
+    exportHeight,
+    mapOffsetX = 0,
+    mapOffsetY = 0,
   } = options;
 
   const applyFadesLayer = showFades ?? showOverlay ?? true;
   const applyMarkers = showMarkers ?? showOverlay ?? true;
 
-  const width = mapCanvas.width;
-  const height = mapCanvas.height;
+  const width = exportWidth ?? mapCanvas.width;
+  const height = exportHeight ?? mapCanvas.height;
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -85,6 +89,8 @@ export async function compositeExport(
     ctx.save();
     const { cx, cy } = clipToDesignMask(ctx, width, height, designId);
 
+    // Translate so the map canvas (captured at mask dimensions) lands at mapOffset.
+    ctx.translate(mapOffsetX, mapOffsetY);
     ctx.drawImage(mapCanvas, 0, 0);
 
     if (applyMarkers && markers.length > 0 && markerIcons.length > 0 && markerProjection) {
@@ -92,7 +98,8 @@ export async function compositeExport(
     }
 
     if (design.centerMarker) {
-      await drawDesignCenterMarker(ctx, cx, cy, height, design.centerMarker, theme.ui?.text ?? "#111111");
+      // Center marker is in poster coordinates; subtract translation to keep it in place.
+      await drawDesignCenterMarker(ctx, cx - mapOffsetX, cy - mapOffsetY, height, design.centerMarker, theme.ui?.text ?? "#111111");
     }
 
     ctx.restore(); // remove mask clip

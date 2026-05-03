@@ -43,6 +43,19 @@ export interface ExportOptions {
   designId?: string;
   /** Resolved background color for the poster (theme bg or user override). */
   bgColor?: string;
+  /**
+   * Final poster dimensions in pixels. When set, the output canvas is sized to
+   * these dimensions rather than to mapCanvas.width/height. Required when the
+   * map was captured at mask dimensions (smaller than the full poster).
+   */
+  exportWidth?: number;
+  exportHeight?: number;
+  /**
+   * Pixel offset of the map area's top-left corner in the full poster canvas.
+   * Non-zero when the map was captured at mask dimensions (circle/heart/padded rect).
+   */
+  mapOffsetX?: number;
+  mapOffsetY?: number;
 }
 
 export interface Typography {

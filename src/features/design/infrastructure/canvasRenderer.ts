@@ -196,35 +196,23 @@ export function resolveDesignElements(
   });
 }
 
-/* ── Arc text via SVG rasterization ── */
+/* ── Arc text via Canvas 2D (character-by-character along the arc) ── */
 
-function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function buildArcPath(cx: number, cy: number, radius: number, midAngleDeg: number, spanDeg: number): string {
-  const half = spanDeg / 2;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const startX = cx + radius * Math.sin(toRad(midAngleDeg - half));
-  const startY = cy - radius * Math.cos(toRad(midAngleDeg - half));
-  const endX = cx + radius * Math.sin(toRad(midAngleDeg + half));
-  const endY = cy - radius * Math.cos(toRad(midAngleDeg + half));
-  const largeArc = spanDeg > 180 ? 1 : 0;
-  return `M ${startX.toFixed(3)} ${startY.toFixed(3)} A ${radius.toFixed(3)} ${radius.toFixed(3)} 0 ${largeArc} 1 ${endX.toFixed(3)} ${endY.toFixed(3)}`;
-}
-
-async function drawArcTextOnCanvas(
+/**
+ * Draws arc text directly using Canvas 2D transforms.
+ * Unlike the SVG blob approach, this always uses the page's already-loaded fonts
+ * so web fonts (Google Fonts) render correctly in export canvases.
+ *
+ * Angle convention: 0° = top (12 o'clock), clockwise — matches DesignRenderer.
+ */
+function drawArcTextOnCanvas(
   ctx: CanvasRenderingContext2D,
   el: ResolvedDesignElement,
   width: number,
   height: number,
   fallbackTextColor: string,
   fallbackFontFamily: string,
-): Promise<void> {
+): void {
   const minSide = Math.min(width, height);
   const cx = ((el.arcCenterX ?? 50) / 100) * width;
   const cy = ((el.arcCenterY ?? 50) / 100) * height;
@@ -232,45 +220,98 @@ async function drawArcTextOnCanvas(
   const fontSizePx = ((el.fontSize ?? 1.6) / 100) * height;
   const color = el.color ?? fallbackTextColor;
   const family = el.fontFamily ?? fallbackFontFamily;
-  const pathId = `arc-${el.id}`;
-  const d = buildArcPath(cx, cy, radius, el.arcMidAngle ?? 0, el.arcSpan ?? 120);
-
-  // letter-spacing in SVG is in user units; convert from em
-  const lsPx = el.letterSpacing ? el.letterSpacing * fontSizePx : 0;
-
+  const midAngleDeg = el.arcMidAngle ?? 0;
+  const letterSpacingPx = (el.letterSpacing ?? 0) * fontSizePx;
   const content = applyTextTransform(el.content ?? "", el.textTransform);
 
-  const svgStr = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`,
-    `<defs><path id="${pathId}" d="${escapeXml(d)}" fill="none"/></defs>`,
-    `<text`,
-    `  font-family="${escapeXml(family || "sans-serif")}"`,
-    `  font-size="${fontSizePx}"`,
-    `  font-weight="${el.fontWeight ?? 400}"`,
-    `  font-style="${el.fontStyle ?? "normal"}"`,
-    `  fill="${escapeXml(color)}"`,
-    `  opacity="${el.opacity ?? 1}"`,
-    `  letter-spacing="${lsPx.toFixed(3)}"`,
-    `>`,
-    `<textPath href="#${pathId}" startOffset="50%" textAnchor="middle">${escapeXml(content)}</textPath>`,
-    `</text></svg>`,
-  ].join("\n");
+  ctx.save();
+  ctx.font = `${el.fontStyle ?? "normal"} ${el.fontWeight ?? 400} ${fontSizePx}px "${family}", sans-serif`;
+  ctx.fillStyle = color;
+  ctx.globalAlpha = el.opacity ?? 1;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
-  const blob = new Blob([svgStr], { type: "image/svg+xml" });
-  const url = URL.createObjectURL(blob);
-  try {
-    await new Promise<void>((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0);
-        resolve();
-      };
-      img.onerror = () => reject(new Error(`Failed to render arc text element "${el.id}"`));
-      img.src = url;
-    });
-  } finally {
-    URL.revokeObjectURL(url);
+  const chars = Array.from(content);
+  // Measure each character; add letter-spacing between all but the last.
+  const charWidths = chars.map((c) => ctx.measureText(c).width);
+  const totalWidth =
+    charWidths.reduce((a, b) => a + b, 0) +
+    letterSpacingPx * Math.max(chars.length - 1, 0);
+
+  // Map total pixel width to a total arc angle (radians).
+  // Arc length = radius × angle, so angle = width / radius.
+  const midAngleRad = (midAngleDeg * Math.PI) / 180;
+  const totalSpanRad = totalWidth / radius;
+  let angleRad = midAngleRad - totalSpanRad / 2;
+
+  for (let i = 0; i < chars.length; i++) {
+    const charAngle = angleRad + (charWidths[i] / 2) / radius;
+
+    // Position on arc: 0°=top, clockwise — (sin θ, -cos θ) unit vector.
+    const x = cx + radius * Math.sin(charAngle);
+    const y = cy - radius * Math.cos(charAngle);
+
+    ctx.save();
+    ctx.translate(x, y);
+    // Rotate so the character's baseline is tangent to the arc.
+    ctx.rotate(charAngle);
+    ctx.fillText(chars[i], 0, 0);
+    ctx.restore();
+
+    angleRad += (charWidths[i] + letterSpacingPx) / radius;
   }
+
+  ctx.restore();
+}
+
+/* ── Mask capture info ── */
+
+/**
+ * Given a design template and final poster pixel dimensions, returns the
+ * dimensions and poster-space offset at which the map should be captured.
+ *
+ * For circle/heart masks the bounding square is used so the live MapLibre
+ * container (which equals the mask area in the preview) maps 1-to-1 to the
+ * capture canvas with no aspect-ratio distortion.
+ */
+export interface MaskCaptureInfo {
+  capWidth: number;
+  capHeight: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+export function computeMaskCaptureInfo(
+  designId: string,
+  posterWidth: number,
+  posterHeight: number,
+): MaskCaptureInfo {
+  const design = getDesignTemplate(designId);
+  const padding = design.styles.mapPadding ?? { top: 4, right: 4, bottom: 22, left: 4 };
+  const mapAreaW = ((100 - padding.left - padding.right) / 100) * posterWidth;
+  const mapAreaH = ((100 - padding.top - padding.bottom) / 100) * posterHeight;
+  const cx = ((padding.left + (100 - padding.left - padding.right) / 2) / 100) * posterWidth;
+  const cy = ((padding.top + (100 - padding.top - padding.bottom) / 2) / 100) * posterHeight;
+
+  if (design.mask === "circle") {
+    const d = Math.min(mapAreaW, mapAreaH);
+    const s = Math.round(d);
+    return { capWidth: s, capHeight: s, offsetX: Math.round(cx - d / 2), offsetY: Math.round(cy - d / 2) };
+  }
+
+  if (design.mask === "heart") {
+    const d = Math.min(mapAreaW, mapAreaH) * 0.96;
+    const s = Math.round(d);
+    return { capWidth: s, capHeight: s, offsetX: Math.round(cx - d / 2), offsetY: Math.round(cy - d / 2) };
+  }
+
+  // rect — capture exactly the padded map area
+  return {
+    capWidth: Math.round(mapAreaW),
+    capHeight: Math.round(mapAreaH),
+    offsetX: Math.round((padding.left / 100) * posterWidth),
+    offsetY: Math.round((padding.top / 100) * posterHeight),
+  };
 }
 
 /* ── Public: draw resolved design elements onto a canvas ── */
@@ -287,7 +328,7 @@ export async function drawDesignElementsOnCanvas(
 ): Promise<void> {
   for (const el of elements) {
     if (el.type === "text-arc") {
-      await drawArcTextOnCanvas(ctx, el, width, height, textColor, fontFamily);
+      drawArcTextOnCanvas(ctx, el, width, height, textColor, fontFamily);
       continue;
     }
 
