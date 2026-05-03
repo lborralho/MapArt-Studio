@@ -6,7 +6,9 @@ import {
   useMemo,
   useRef,
   type ReactNode,
+  type MutableRefObject,
 } from "react";
+import type { ElementBounds } from "@/features/design/domain/types";
 import {
   posterReducer,
   type PosterState,
@@ -113,6 +115,8 @@ interface PosterContextValue {
   effectiveTheme: ResolvedTheme;
   mapStyle: StyleSpecification;
   mapRef: MapInstanceRef;
+  /** Shared visual bounds for all design elements, written by the canvas and read by the sidebar. */
+  designElementBoundsRef: MutableRefObject<Map<string, ElementBounds>>;
 }
 
 const PosterContext = createContext<PosterContextValue | null>(null);
@@ -122,6 +126,7 @@ const PosterContext = createContext<PosterContextValue | null>(null);
 export function PosterProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(posterReducer, INITIAL_STATE);
   const mapRef = useRef(null) as MapInstanceRef;
+  const designElementBoundsRef = useRef<Map<string, ElementBounds>>(new Map());
   const lastSyncedMarkerThemeColorRef = useRef<string | null>(null);
   const hasLoadedCustomIconsRef = useRef(false);
 
@@ -223,6 +228,7 @@ export function PosterProvider({ children }: { children: ReactNode }) {
       effectiveTheme,
       mapStyle,
       mapRef,
+      designElementBoundsRef,
     }),
     [state, selectedTheme, effectiveTheme, mapStyle],
   );

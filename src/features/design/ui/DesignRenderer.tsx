@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   type CSSProperties,
@@ -14,6 +15,8 @@ import type {
   TemplateVars,
 } from "@/features/design/domain/types";
 import { useDesignEditor } from "@/features/design/application/useDesignEditor";
+import { usePosterContext } from "@/features/poster/ui/PosterContext";
+import type { ElementBounds } from "@/features/design/domain/types";
 import { DesignCanvas } from "./DesignCanvas";
 
 /* ────── Center marker ────── */
@@ -222,6 +225,15 @@ export default function DesignRenderer({
 
   const editorHandle = useDesignEditor(design, templateVars, mapBounds);
 
+  const { designElementBoundsRef } = usePosterContext();
+  const handleBoundsUpdate = useCallback(
+    (id: string, bounds: ElementBounds) => {
+      editorHandle.reportBounds(id, bounds);
+      designElementBoundsRef.current.set(id, bounds);
+    },
+    [editorHandle.reportBounds, designElementBoundsRef],
+  );
+
   const maskStyle: CSSProperties = useMemo(() => {
     if (design.mask === "rect") {
       return {
@@ -346,7 +358,7 @@ export default function DesignRenderer({
           elements={showText ? editorHandle.resolvedElements : []}
           activeElementId={editorHandle.activeElementId}
           onSelect={editorHandle.selectElement}
-          onBoundsUpdate={editorHandle.reportBounds}
+          onBoundsUpdate={handleBoundsUpdate}
           editorHandle={editorHandle}
           fallbackColor={textColor}
           fallbackFont={fontFamily}

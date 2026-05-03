@@ -63,7 +63,7 @@ export default function SettingsPanel({
 }: {
   mobileTab?: MobileTab;
 }) {
-  const { state, dispatch, selectedTheme, effectiveTheme } = usePosterContext();
+  const { state, dispatch, selectedTheme, effectiveTheme, designElementBoundsRef } = usePosterContext();
   const {
     handleChange,
     handleNumericFieldBlur,
@@ -272,6 +272,7 @@ export default function SettingsPanel({
                   dispatch({ type: "SET_DESIGN_BG_COLOR", color })
                 }
                 onResetAll={() => dispatch({ type: "RESET_DESIGN_OVERRIDES" })}
+                getBounds={(id) => designElementBoundsRef.current.get(id)}
               />
             ) : null}
           </div>

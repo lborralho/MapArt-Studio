@@ -127,9 +127,10 @@ function resolveElement(
   if (live?.cx !== undefined && live?.cy !== undefined) {
     cx = live.cx;
     cy = live.cy;
-  } else if (override?.cx !== undefined && override?.cy !== undefined) {
-    cx = override.cx;
-    cy = override.cy;
+  } else if (override?.cx !== undefined || override?.cy !== undefined) {
+    const fallback = normalizeElementCoords(template);
+    cx = override?.cx ?? fallback.cx;
+    cy = override?.cy ?? fallback.cy;
   } else if (override?.x !== undefined || override?.y !== undefined) {
     ({ cx, cy } = normalizeElementCoords({
       x: override.x ?? template.x,

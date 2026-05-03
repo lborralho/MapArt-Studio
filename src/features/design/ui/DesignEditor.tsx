@@ -6,8 +6,10 @@ import type {
   DesignOverrides,
   DesignCoordsFormat,
   DesignCoordsPrecision,
+  ElementBounds,
 } from "@/features/design/domain/types";
 import type { FontOption } from "@/core/config";
+import { normalizeElementCoords } from "@/features/design/domain/coords";
 import {
   ChevronDownIcon,
   AlignLeftIcon, AlignCenterHIcon, AlignRightIcon,
@@ -141,12 +143,14 @@ function ElementEditor({
   fontOptions,
   onOverride,
   onReset,
+  bounds,
 }: {
   element: DesignElement;
   override: DesignElementOverride;
   fontOptions: FontOption[];
   onOverride: (o: Partial<DesignElementOverride>) => void;
   onReset: () => void;
+  bounds?: ElementBounds;
 }) {
   const isText = element.type === "text" || element.type === "text-arc";
   const isArc = element.type === "text-arc";
@@ -154,12 +158,43 @@ function ElementEditor({
   const isDivider = element.type === "divider" || element.type === "line";
   const isCoords = element.type === "coordinates";
 
-  // cx/cy take precedence over legacy x/y — they're set by the drag editor
-  const x = override.cx ?? override.x ?? element.x;
-  const y = override.cy ?? override.y ?? element.y;
+  // Resolve display values for X/Y inputs using the canonical cx/cy format.
+  // Falls back to normalizeElementCoords so the input always shows the true
+  // visual center, not the legacy anchor-based x/y from the template.
+  const { cx: defaultCx, cy: defaultCy } = normalizeElementCoords(element);
+  const x = override.cx ?? defaultCx;
+  const y = override.cy ?? defaultCy;
 
-  const alignH = (val: number) => onOverride(isArc ? { arcCenterX: val } : { cx: val });
-  const alignV = (val: number) => onOverride(isArc ? { arcCenterY: val } : { cy: val });
+  // Letter-spacing shifts the visual ink center left of the CSS box center.
+  // vOffX = bounds.cx − el.cx is a constant for this element (depends only on
+  // font metrics). Alignment targets must compensate: CSS cx = visual target − vOffX.
+  const vOffX = bounds ? bounds.cx - x : 0;
+
+  // Alignment helpers — use trimmed visual bounds when available so that
+  // "align left" places the element's ink edge at the canvas edge, not its center.
+  // Each button writes both cx AND cy so resolveElement always has a complete position.
+  const alignLeft = () => {
+    if (isArc) { onOverride({ arcCenterX: 0 }); return; }
+    const w = bounds?.width ?? (override.width ?? element.width ?? 0);
+    onOverride({ cx: w / 2 - vOffX, cy: y });
+  };
+  const alignCenterH = () => onOverride(isArc ? { arcCenterX: 50 } : { cx: 50 - vOffX, cy: y });
+  const alignRight = () => {
+    if (isArc) { onOverride({ arcCenterX: 100 }); return; }
+    const w = bounds?.width ?? (override.width ?? element.width ?? 0);
+    onOverride({ cx: 100 - w / 2 - vOffX, cy: y });
+  };
+  const alignTop = () => {
+    if (isArc) { onOverride({ arcCenterY: 0 }); return; }
+    const h = bounds?.height ?? 0;
+    onOverride({ cy: h / 2, cx: x });
+  };
+  const alignCenterV = () => onOverride(isArc ? { arcCenterY: 50 } : { cy: 50, cx: x });
+  const alignBottom = () => {
+    if (isArc) { onOverride({ arcCenterY: 100 }); return; }
+    const h = bounds?.height ?? 0;
+    onOverride({ cy: 100 - h / 2, cx: x });
+  };
   const color = override.color ?? element.color ?? "";
   const opacity = override.opacity ?? element.opacity ?? 1;
   const fontFamily = override.fontFamily ?? element.fontFamily ?? "";
@@ -202,19 +237,19 @@ function ElementEditor({
         </span>
         <div className="de-align-grid">
           <div className="de-align-row">
-            <button type="button" className="de-align-btn" title="Align left" onClick={() => alignH(0)}><AlignLeftIcon /></button>
-            <button type="button" className="de-align-btn" title="Center horizontally" onClick={() => alignH(50)}><AlignCenterHIcon /></button>
-            <button type="button" className="de-align-btn" title="Align right" onClick={() => alignH(100)}><AlignRightIcon /></button>
+            <button type="button" className="de-align-btn" title="Align left" onClick={alignLeft}><AlignLeftIcon /></button>
+            <button type="button" className="de-align-btn" title="Center horizontally" onClick={alignCenterH}><AlignCenterHIcon /></button>
+            <button type="button" className="de-align-btn" title="Align right" onClick={alignRight}><AlignRightIcon /></button>
           </div>
           <div className="de-align-row">
-            <button type="button" className="de-align-btn" title="Align top" onClick={() => alignV(0)}><AlignTopIcon /></button>
-            <button type="button" className="de-align-btn" title="Center vertically" onClick={() => alignV(50)}><AlignCenterVIcon /></button>
-            <button type="button" className="de-align-btn" title="Align bottom" onClick={() => alignV(100)}><AlignBottomIcon /></button>
+            <button type="button" className="de-align-btn" title="Align top" onClick={alignTop}><AlignTopIcon /></button>
+            <button type="button" className="de-align-btn" title="Center vertically" onClick={alignCenterV}><AlignCenterVIcon /></button>
+            <button type="button" className="de-align-btn" title="Align bottom" onClick={alignBottom}><AlignBottomIcon /></button>
           </div>
         </div>
         <div className="de-row">
-          <NumField label="X %" value={x} min={0} max={100} step={0.5} onChange={(v) => onOverride({ cx: v })} />
-          <NumField label="Y %" value={y} min={0} max={100} step={0.5} onChange={(v) => onOverride({ cy: v })} />
+          <NumField label="X %" value={x} min={0} max={100} step={0.5} onChange={(v) => onOverride({ cx: v, cy: y })} />
+          <NumField label="Y %" value={y} min={0} max={100} step={0.5} onChange={(v) => onOverride({ cy: v, cx: x })} />
         </div>
       </div>
 
@@ -450,6 +485,7 @@ export interface DesignEditorProps {
   onClearElementOverride: (elementId: string) => void;
   onBgColorChange: (color: string | null) => void;
   onResetAll: () => void;
+  getBounds?: (id: string) => ElementBounds | undefined;
 }
 
 export default function DesignEditor({
@@ -464,6 +500,7 @@ export default function DesignEditor({
   onClearElementOverride,
   onBgColorChange,
   onResetAll,
+  getBounds,
 }: DesignEditorProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -561,6 +598,7 @@ export default function DesignEditor({
                     fontOptions={fontOptions}
                     onOverride={(o) => onOverride(el.id, o)}
                     onReset={() => onClearElementOverride(el.id)}
+                    bounds={getBounds?.(el.id)}
                   />
                 )}
               </div>
