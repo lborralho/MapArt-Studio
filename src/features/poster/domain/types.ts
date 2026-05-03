@@ -4,6 +4,7 @@ import type {
   MarkerItem,
   MarkerProjectionInput,
 } from "@/features/markers/domain/types";
+import type { ResolvedDesignElement } from "@/features/design/domain/types";
 
 export interface CanvasSize {
   width: number;
@@ -24,13 +25,20 @@ export interface ExportOptions {
   displayContinent?: string;
   fontFamily: string;
   showPosterText: boolean;
+  /** @deprecated Use showFades + showMarkers instead. */
   showOverlay?: boolean;
+  /** Whether to draw gradient fades/vignette (theme effect). Defaults to true. */
+  showFades?: boolean;
+  /** Whether to draw markers (user toggle). Defaults to showOverlay when omitted. */
+  showMarkers?: boolean;
   markers?: MarkerItem[];
   markerIcons?: MarkerIconDefinition[];
   markerProjection?: MarkerProjectionInput;
   markerScaleX?: number;
   markerScaleY?: number;
   markerSizeScale?: number;
+  /** Design elements to render on the export canvas (replaces legacy drawPosterText). */
+  designElements?: ResolvedDesignElement[];
 }
 
 export interface Typography {

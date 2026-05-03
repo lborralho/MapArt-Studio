@@ -1,0 +1,24 @@
+/* ── Design Canvas ── */
+
+/* Container: fills its parent, clips overflow, establishes stacking context */
+.dc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* All nodes: absolutely positioned over the canvas */
+.dc > * {
+  box-sizing: border-box;
+}
+
+/* Ensure SVG arc text nodes span the full canvas without cutting off */
+.dc > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}

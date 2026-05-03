@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { usePosterContext } from "@/features/poster/ui/PosterContext";
 import { reverseGeocodeCoordinates } from "@/core/services";
 import { DEFAULT_DISTANCE_METERS } from "@/core/config";
@@ -22,9 +22,13 @@ export function useCurrentLocation(
   const [isLocatingUser, setIsLocatingUser] = useState(false);
   const [locationPermissionMessage, setLocationPermissionMessage] =
     useState("");
+  // Use a ref for the in-flight guard so the callback identity stays stable
+  // and doesn't re-create every time isLocatingUser flips.
+  const isLocatingRef = useRef(false);
 
   const handleUseCurrentLocation = useCallback(() => {
-    if (isLocatingUser) return;
+    if (isLocatingRef.current) return;
+    isLocatingRef.current = true;
 
     setIsLocatingUser(true);
     void (async () => {
@@ -33,10 +37,11 @@ export function useCurrentLocation(
         maxAttempts: 2,
       });
 
-      if (!positionResult.ok) {
+      if (positionResult.ok === false) {
         setLocationPermissionMessage(
           getGeolocationFailureMessage(positionResult.reason),
         );
+        isLocatingRef.current = false;
         setIsLocatingUser(false);
         return;
       }
@@ -85,9 +90,10 @@ export function useCurrentLocation(
         dispatch({ type: "SET_USER_LOCATION", location: fallback });
       }
 
+      isLocatingRef.current = false;
       setIsLocatingUser(false);
     })();
-  }, [isLocatingUser, flyToLocation, dispatch]);
+  }, [flyToLocation, dispatch]);
 
   return { handleUseCurrentLocation, isLocatingUser, locationPermissionMessage };
 }

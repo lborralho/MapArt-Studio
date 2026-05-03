@@ -33,6 +33,7 @@ import type { SearchResult } from "@/features/location/domain/types";
 import { designOptions } from "@/features/design/infrastructure/designRepository";
 import { getDesignTemplate } from "@/features/design/infrastructure/designRepository";
 import DesignCard from "@/features/design/ui/DesignCard";
+import DesignEditor from "@/features/design/ui/DesignEditor";
 
 type SectionId =
   | "location"
@@ -62,7 +63,7 @@ export default function SettingsPanel({
 }: {
   mobileTab?: MobileTab;
 }) {
-  const { state, dispatch, selectedTheme } = usePosterContext();
+  const { state, dispatch, selectedTheme, effectiveTheme } = usePosterContext();
   const {
     handleChange,
     handleNumericFieldBlur,
@@ -248,43 +249,30 @@ export default function SettingsPanel({
                     />
                   ))}
                 </div>
-                {state.form.designId !== "classic" ? (
-                  <div className="design-text-overrides">
-                    <h3>Customize Text</h3>
-                    {getDesignTemplate(state.form.designId)
-                      .elements.filter(
-                        (el) =>
-                          el.editable &&
-                          (el.type === "text" || el.type === "text-arc"),
-                      )
-                      .map((el) => {
-                        const label =
-                          el.editLabel ??
-                          el.id.charAt(0).toUpperCase() + el.id.slice(1);
-                        const placeholder =
-                          el.content?.replace(/\{\{(\w+)\}\}/g, (_, k) => k) ?? "";
-                        return (
-                          <label key={el.id} className="design-text-field">
-                            <span className="design-text-field-label">{label}</span>
-                            <input
-                              type="text"
-                              className="design-text-field-input"
-                              placeholder={placeholder}
-                              value={state.designOverrides[el.id] ?? ""}
-                              onChange={(e) =>
-                                dispatch({
-                                  type: "SET_DESIGN_OVERRIDE",
-                                  elementId: el.id,
-                                  content: e.target.value,
-                                })
-                              }
-                            />
-                          </label>
-                        );
-                      })}
-                  </div>
-                ) : null}
               </section>
+            ) : null}
+            {!isColorEditorActive && state.form.designId !== "classic" ? (
+              <DesignEditor
+                design={getDesignTemplate(state.form.designId)}
+                overrides={state.designOverrides}
+                themeBgColor={effectiveTheme.ui.bg}
+                designBgColor={state.designBgColor}
+                fontOptions={FONT_OPTIONS}
+                activeElementId={state.activeDesignElementId}
+                onActiveElementChange={(id) =>
+                  dispatch({ type: "SET_ACTIVE_DESIGN_ELEMENT", elementId: id })
+                }
+                onOverride={(elementId, override) =>
+                  dispatch({ type: "SET_DESIGN_OVERRIDE", elementId, override })
+                }
+                onClearElementOverride={(elementId) =>
+                  dispatch({ type: "CLEAR_DESIGN_ELEMENT_OVERRIDE", elementId })
+                }
+                onBgColorChange={(color) =>
+                  dispatch({ type: "SET_DESIGN_BG_COLOR", color })
+                }
+                onResetAll={() => dispatch({ type: "RESET_DESIGN_OVERRIDES" })}
+              />
             ) : null}
           </div>
         </div>

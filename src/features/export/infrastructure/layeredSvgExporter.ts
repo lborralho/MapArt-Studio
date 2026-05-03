@@ -25,7 +25,10 @@ interface LayeredSvgOptions {
   displayCountry: string;
   fontFamily?: string;
   showPosterText: boolean;
-  showOverlay: boolean;
+  /** Whether to draw gradient fades/vignette (theme effect). Defaults to true. */
+  showFades?: boolean;
+  /** Whether to draw markers (user toggle). */
+  showMarkers: boolean;
   markers: MarkerItem[];
   markerIcons: MarkerIconDefinition[];
 }
@@ -103,7 +106,8 @@ export async function createLayeredSvgBlobFromMap({
   displayCountry,
   fontFamily,
   showPosterText,
-  showOverlay,
+  showFades = true,
+  showMarkers,
   markers,
   markerIcons,
 }: LayeredSvgOptions): Promise<Blob> {
@@ -212,7 +216,7 @@ export async function createLayeredSvgBlobFromMap({
 
     const overlayLayers: { id: string; dataUrl: string }[] = [];
 
-    if (showOverlay) {
+    if (showFades) {
       overlayLayers.push({
         id: "fades",
         dataUrl: canvasToDataUrl(exportWidth, exportHeight, (ctx) => {
@@ -221,7 +225,7 @@ export async function createLayeredSvgBlobFromMap({
       });
     }
 
-    if (markers.length > 0 && markerIcons.length > 0) {
+    if (showMarkers && markers.length > 0 && markerIcons.length > 0) {
       // drawMarkersOnCanvas is async; render through explicit await canvas path.
       const markersCanvas = document.createElement("canvas");
       markersCanvas.width = exportWidth;

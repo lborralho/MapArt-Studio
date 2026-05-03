@@ -65,13 +65,15 @@ export interface FontOption {
 
 export const FONT_OPTIONS: FontOption[] = [
   { value: "", label: "Default (Space Grotesk)" },
+  { value: "Inter", label: "Inter" },
   { value: "Montserrat", label: "Montserrat" },
-  { value: "Playfair Display", label: "Playfair Display" },
-  { value: "Oswald", label: "Oswald" },
-  { value: "Noto Sans JP", label: "Noto Sans JP" },
-  { value: "Source Sans Pro", label: "Source Sans Pro" },
   { value: "Raleway", label: "Raleway" },
   { value: "Lato", label: "Lato" },
+  { value: "Source Sans Pro", label: "Source Sans Pro" },
+  { value: "Oswald", label: "Oswald" },
+  { value: "Bebas Neue", label: "Bebas Neue" },
+  { value: "Playfair Display", label: "Playfair Display" },
+  { value: "Cormorant Garamond", label: "Cormorant Garamond" },
   { value: "Merriweather", label: "Merriweather" },
-  { value: "Bebas neue", label: "Bebas Neue" },
+  { value: "Noto Sans JP", label: "Noto Sans JP" },
 ];

@@ -420,9 +420,17 @@ export default function PreviewPanel() {
               city={cityLabel}
               country={countryLabel}
               textColor={effectiveTheme.ui.text}
-              bgColor={effectiveTheme.ui.bg}
+              bgColor={state.designBgColor ?? effectiveTheme.ui.bg}
               fontFamily={form.fontFamily}
               showText={form.showPosterText}
+              isDesignEditing={isDesignActive && !isMarkerEditorActive}
+              activeElementId={state.activeDesignElementId}
+              onElementSelect={(id) =>
+                dispatch({ type: "SET_ACTIVE_DESIGN_ELEMENT", elementId: id })
+              }
+              onElementDrag={(id, override) =>
+                dispatch({ type: "SET_DESIGN_OVERRIDE", elementId: id, override })
+              }
             >
               <MapPreview
                 style={mapStyle}

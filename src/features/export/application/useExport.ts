@@ -5,6 +5,7 @@ import { compositeExport } from "@/features/poster/infrastructure/renderer";
 import { resolveCanvasSize } from "@/features/poster/infrastructure/renderer/canvas";
 import { getAllMarkerIcons } from "@/features/markers/infrastructure/iconRegistry";
 import { ensureGoogleFont } from "@/core/services";
+import { resolveDesignElements } from "@/features/design/infrastructure/canvasRenderer";
 import {
   createPngBlob,
   createPdfBlobFromCanvas,
@@ -33,6 +34,17 @@ export function useExport() {
   const { form } = state;
   const hasVisibleMarkers = form.showMarkers && state.markers.length > 0;
 
+  // Resolve design elements once per export so the canvas renderer matches the live preview.
+  const getResolvedDesignElements = useCallback(() => {
+    if (!form.showPosterText) return [];
+    return resolveDesignElements(
+      form.designId,
+      state.designOverrides,
+      form.displayCity || form.location || "",
+      form.displayCountry || "",
+    );
+  }, [form.showPosterText, form.designId, state.designOverrides, form.displayCity, form.location, form.displayCountry]);
+
   const exportPoster = useCallback(
     async (format: "png" | "pdf" | "svg") => {
       const map = mapRef.current;
@@ -55,7 +67,7 @@ export function useExport() {
         const widthInches = widthCm / CM_PER_INCH;
         const heightInches = heightCm / CM_PER_INCH;
 
-        const size = resolveCanvasSize(widthInches, heightInches, dpi);
+        const size = resolveCanvasSize(widthInches, heightInches);
 
         const lat = Number(form.latitude) || 0;
         const lon = Number(form.longitude) || 0;
@@ -71,7 +83,9 @@ export function useExport() {
             displayCountry: form.displayCountry || "",
             fontFamily: form.fontFamily.trim(),
             showPosterText: form.showPosterText,
-            showOverlay: form.showMarkers,
+            // Fades are a theme effect — always apply them regardless of markers.
+            showFades: true,
+            showMarkers: hasVisibleMarkers,
             markers: hasVisibleMarkers ? state.markers : [],
             markerIcons: hasVisibleMarkers
               ? getAllMarkerIcons(state.customMarkerIcons)
@@ -106,7 +120,9 @@ export function useExport() {
           displayCountry: form.displayCountry || "",
           fontFamily: form.fontFamily.trim(),
           showPosterText: form.showPosterText,
-          showOverlay: form.showMarkers,
+          // Fades are a theme effect — always apply them.
+          showFades: true,
+          showMarkers: form.showMarkers,
           markers: hasVisibleMarkers ? state.markers : [],
           markerIcons: hasVisibleMarkers
             ? getAllMarkerIcons(state.customMarkerIcons)
@@ -115,6 +131,7 @@ export function useExport() {
           markerScaleX: hasVisibleMarkers ? markerScaleX : undefined,
           markerScaleY: hasVisibleMarkers ? markerScaleY : undefined,
           markerSizeScale: hasVisibleMarkers ? markerSizeScale : undefined,
+          designElements: getResolvedDesignElements(),
         });
 
         // 3. Download
@@ -149,6 +166,7 @@ export function useExport() {
       hasVisibleMarkers,
       state.markers,
       state.customMarkerIcons,
+      getResolvedDesignElements,
     ],
   );
 

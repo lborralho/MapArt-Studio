@@ -41,3 +41,65 @@ export { FiX as CloseIcon } from "react-icons/fi";
 export { FiMonitor as MonitorIcon } from "react-icons/fi";
 export { FiSearch as SearchIcon } from "react-icons/fi";
 export { FiLayout as DesignIcon } from "react-icons/fi";
+
+/* ── Alignment icons (Figma-style, inline SVG) ── */
+
+export function AlignLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="1.5" y="2.5" width="1.5" height="11" rx="0.5" opacity="0.45" />
+      <rect x="4" y="3.5" width="9" height="3.5" rx="1" />
+      <rect x="4" y="9" width="6" height="3" rx="1" opacity="0.65" />
+    </svg>
+  );
+}
+
+export function AlignCenterHIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="7.25" y="2.5" width="1.5" height="11" rx="0.5" opacity="0.45" />
+      <rect x="2.5" y="3.5" width="11" height="3.5" rx="1" />
+      <rect x="4" y="9" width="8" height="3" rx="1" opacity="0.65" />
+    </svg>
+  );
+}
+
+export function AlignRightIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="13" y="2.5" width="1.5" height="11" rx="0.5" opacity="0.45" />
+      <rect x="3" y="3.5" width="9" height="3.5" rx="1" />
+      <rect x="6" y="9" width="6" height="3" rx="1" opacity="0.65" />
+    </svg>
+  );
+}
+
+export function AlignTopIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="2.5" y="1.5" width="11" height="1.5" rx="0.5" opacity="0.45" />
+      <rect x="3.5" y="4" width="3.5" height="9" rx="1" />
+      <rect x="9" y="4" width="3" height="6" rx="1" opacity="0.65" />
+    </svg>
+  );
+}
+
+export function AlignCenterVIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="2.5" y="7.25" width="11" height="1.5" rx="0.5" opacity="0.45" />
+      <rect x="3.5" y="2.5" width="3.5" height="11" rx="1" />
+      <rect x="9" y="4" width="3" height="8" rx="1" opacity="0.65" />
+    </svg>
+  );
+}
+
+export function AlignBottomIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="2.5" y="13" width="11" height="1.5" rx="0.5" opacity="0.45" />
+      <rect x="3.5" y="3" width="3.5" height="9" rx="1" />
+      <rect x="9" y="6" width="3" height="6" rx="1" opacity="0.65" />
+    </svg>
+  );
+}

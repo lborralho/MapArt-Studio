@@ -97,8 +97,8 @@ function AppShell() {
       return () => window.cancelIdleCallback(idleId);
     }
 
-    const timer = window.setTimeout(preload, 300);
-    return () => window.clearTimeout(timer);
+    const timer = setTimeout(preload, 300);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

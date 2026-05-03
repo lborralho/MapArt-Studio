@@ -4,7 +4,7 @@ import type {
   MarkerIconDefinition,
   MarkerItem,
 } from "@/features/markers/domain/types";
-import type { DesignOverrides } from "@/features/design/domain/types";
+import type { DesignOverrides, DesignElementOverride } from "@/features/design/domain/types";
 import {
   MAX_MARKER_SIZE,
   MIN_MARKER_SIZE,
@@ -62,6 +62,10 @@ export interface PosterState {
     country: boolean;
   };
   designOverrides: DesignOverrides;
+  /** Background color override specific to the chosen design (null = use theme bg). */
+  designBgColor: string | null;
+  /** Currently selected design element (for panel ↔ preview sync). */
+  activeDesignElementId: string | null;
 }
 
 /* ────── Actions ────── */
@@ -102,7 +106,10 @@ export type PosterAction =
     }
   | { type: "RESET_MARKER_DEFAULTS" }
   | { type: "SET_DESIGN"; designId: string }
-  | { type: "SET_DESIGN_OVERRIDE"; elementId: string; content: string }
+  | { type: "SET_ACTIVE_DESIGN_ELEMENT"; elementId: string | null }
+  | { type: "SET_DESIGN_OVERRIDE"; elementId: string; override: Partial<DesignElementOverride> }
+  | { type: "CLEAR_DESIGN_ELEMENT_OVERRIDE"; elementId: string }
+  | { type: "SET_DESIGN_BG_COLOR"; color: string | null }
   | { type: "RESET_DESIGN_OVERRIDES" };
 
 /* ────── Reducer ────── */
@@ -379,22 +386,43 @@ export function posterReducer(
         ...state,
         form: { ...state.form, designId: action.designId },
         designOverrides: {},
+        designBgColor: null,
+        activeDesignElementId: null,
       };
 
-    case "SET_DESIGN_OVERRIDE":
+    case "SET_ACTIVE_DESIGN_ELEMENT":
+      return { ...state, activeDesignElementId: action.elementId };
+
+    case "SET_DESIGN_OVERRIDE": {
+      const existing = state.designOverrides[action.elementId] ?? {};
+      const merged: Record<string, unknown> = { ...existing };
+      for (const [k, v] of Object.entries(action.override)) {
+        if (v === undefined) {
+          delete merged[k];
+        } else {
+          merged[k] = v;
+        }
+      }
       return {
         ...state,
         designOverrides: {
           ...state.designOverrides,
-          [action.elementId]: action.content,
+          [action.elementId]: merged as DesignElementOverride,
         },
       };
+    }
+
+    case "CLEAR_DESIGN_ELEMENT_OVERRIDE": {
+      const next = { ...state.designOverrides };
+      delete next[action.elementId];
+      return { ...state, designOverrides: next };
+    }
+
+    case "SET_DESIGN_BG_COLOR":
+      return { ...state, designBgColor: action.color };
 
     case "RESET_DESIGN_OVERRIDES":
-      return {
-        ...state,
-        designOverrides: {},
-      };
+      return { ...state, designOverrides: {}, designBgColor: null };
 
     default:
       return state;

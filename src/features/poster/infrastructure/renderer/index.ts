@@ -1,6 +1,7 @@
 import { applyFades } from "./layers";
 import { drawPosterText } from "./typography";
 import { drawMarkersOnCanvas } from "@/features/markers/infrastructure/rendering";
+import { drawDesignElementsOnCanvas } from "@/features/design/infrastructure/canvasRenderer";
 import type { ExportOptions, CanvasSize } from "../../domain/types";
 
 /**
@@ -26,13 +27,22 @@ export async function compositeExport(
     fontFamily,
     showPosterText = true,
     showOverlay = true,
+    showFades,
+    showMarkers,
     markers = [],
     markerIcons = [],
     markerProjection,
     markerScaleX = 1,
     markerScaleY = 1,
     markerSizeScale = 1,
+    designElements,
   } = options;
+
+  // showFades defaults to true (it is a theme effect, not tied to markers).
+  // Falls back to legacy showOverlay if the new flag isn't provided.
+  const applyFadesLayer = showFades ?? showOverlay ?? true;
+  // showMarkers falls back to legacy showOverlay for backwards compatibility.
+  const applyMarkers = showMarkers ?? showOverlay ?? true;
 
   const width = mapCanvas.width;
   const height = mapCanvas.height;
@@ -48,12 +58,12 @@ export async function compositeExport(
   ctx.drawImage(mapCanvas, 0, 0);
 
   // 2. Gradient fades
-  if (showOverlay) {
+  if (applyFadesLayer) {
     applyFades(ctx, width, height, theme.ui.bg);
   }
 
   // 3. Markers
-  if (markers.length > 0 && markerIcons.length > 0 && markerProjection) {
+  if (applyMarkers && markers.length > 0 && markerIcons.length > 0 && markerProjection) {
     await drawMarkersOnCanvas(
       ctx,
       markers,
@@ -65,18 +75,32 @@ export async function compositeExport(
     );
   }
 
-  // 4. Poster text
-  drawPosterText(
-    ctx,
-    width,
-    height,
-    theme,
-    center,
-    displayCity,
-    displayCountry,
-    fontFamily,
-    showPosterText,
-  );
+  // 4. Poster text — use design canvas renderer when elements are provided,
+  //    otherwise fall back to the legacy hardcoded layout.
+  if (designElements && designElements.length > 0 && showPosterText) {
+    await drawDesignElementsOnCanvas(
+      ctx,
+      width,
+      height,
+      designElements,
+      center.lat,
+      center.lon,
+      theme.ui?.text ?? "#111111",
+      fontFamily,
+    );
+  } else {
+    drawPosterText(
+      ctx,
+      width,
+      height,
+      theme,
+      center,
+      displayCity,
+      displayCountry,
+      fontFamily,
+      showPosterText,
+    );
+  }
 
   const size: CanvasSize = {
     width,

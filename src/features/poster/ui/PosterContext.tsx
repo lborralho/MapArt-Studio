@@ -100,6 +100,8 @@ const INITIAL_STATE: PosterState = {
     country: false,
   },
   designOverrides: {},
+  designBgColor: null,
+  activeDesignElementId: null,
 };
 
 /* ────── Context shape ────── */
