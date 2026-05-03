@@ -39,6 +39,10 @@ export interface ExportOptions {
   markerSizeScale?: number;
   /** Design elements to render on the export canvas (replaces legacy drawPosterText). */
   designElements?: ResolvedDesignElement[];
+  /** Active design template ID — used to apply background fill and mask shape. */
+  designId?: string;
+  /** Resolved background color for the poster (theme bg or user override). */
+  bgColor?: string;
 }
 
 export interface Typography {

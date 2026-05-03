@@ -120,7 +120,6 @@ export function useExport() {
           displayCountry: form.displayCountry || "",
           fontFamily: form.fontFamily.trim(),
           showPosterText: form.showPosterText,
-          // Fades are a theme effect — always apply them.
           showFades: true,
           showMarkers: form.showMarkers,
           markers: hasVisibleMarkers ? state.markers : [],
@@ -132,6 +131,8 @@ export function useExport() {
           markerScaleY: hasVisibleMarkers ? markerScaleY : undefined,
           markerSizeScale: hasVisibleMarkers ? markerSizeScale : undefined,
           designElements: getResolvedDesignElements(),
+          designId: form.designId,
+          bgColor: state.designBgColor ?? effectiveTheme.ui.bg,
         });
 
         // 3. Download

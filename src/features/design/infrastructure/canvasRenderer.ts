@@ -1,4 +1,5 @@
 import type {
+  DesignCenterMarker,
   DesignElement,
   DesignOverrides,
   ResolvedDesignElement,
@@ -15,6 +16,152 @@ function resolveTemplateContent(content: string, city: string, country: string):
     if (key === "country") return country;
     return "";
   });
+}
+
+/* ── Background fill ── */
+
+export function fillDesignBackground(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  bgColor: string,
+): void {
+  ctx.save();
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, width, height);
+  ctx.restore();
+}
+
+/* ── Mask clip ── */
+
+export interface DesignMaskInfo {
+  cx: number;
+  cy: number;
+}
+
+/**
+ * Clips the canvas context to the design template's mask shape (rect, circle, or heart)
+ * and returns the pixel center of the masked area.
+ * Caller must wrap this in ctx.save() / ctx.restore() to remove the clip when done.
+ */
+export function clipToDesignMask(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  designId: string,
+): DesignMaskInfo {
+  const design = getDesignTemplate(designId);
+  const padding = design.styles.mapPadding ?? { top: 4, right: 4, bottom: 22, left: 4 };
+  const mapAreaW = 100 - padding.left - padding.right;
+  const mapAreaH = 100 - padding.top - padding.bottom;
+  const cx = ((padding.left + mapAreaW / 2) / 100) * width;
+  const cy = ((padding.top + mapAreaH / 2) / 100) * height;
+
+  ctx.beginPath();
+
+  if (design.mask === "circle") {
+    const sizePx = Math.min((mapAreaW / 100) * width, (mapAreaH / 100) * height);
+    ctx.arc(cx, cy, sizePx / 2, 0, Math.PI * 2);
+  } else if (design.mask === "heart") {
+    const sizePx =
+      Math.min((mapAreaW / 100) * width, (mapAreaH / 100) * height) * 0.96;
+    const s = sizePx;
+    const ox = cx - s / 2;
+    const oy = cy - s / 2;
+    // Mirrors the SVG path used in DesignRenderer for the CSS clip-path
+    ctx.moveTo(ox + 0.5 * s, oy + 0.9 * s);
+    ctx.bezierCurveTo(ox + 0.25 * s, oy + 0.7 * s, ox, oy + 0.5 * s, ox + 0.1 * s, oy + 0.3 * s);
+    ctx.bezierCurveTo(ox + 0.18 * s, oy + 0.15 * s, ox + 0.35 * s, oy + 0.2 * s, ox + 0.5 * s, oy + 0.35 * s);
+    ctx.bezierCurveTo(ox + 0.65 * s, oy + 0.2 * s, ox + 0.82 * s, oy + 0.15 * s, ox + 0.9 * s, oy + 0.3 * s);
+    ctx.bezierCurveTo(ox + s, oy + 0.5 * s, ox + 0.75 * s, oy + 0.7 * s, ox + 0.5 * s, oy + 0.9 * s);
+    ctx.closePath();
+  } else {
+    // rect — clip to the padded map area
+    ctx.rect(
+      (padding.left / 100) * width,
+      (padding.top / 100) * height,
+      (mapAreaW / 100) * width,
+      (mapAreaH / 100) * height,
+    );
+  }
+
+  ctx.clip();
+  return { cx, cy };
+}
+
+/* ── Center marker ── */
+
+async function loadSvgImage(svgContent: string): Promise<HTMLImageElement> {
+  const blob = new Blob([svgContent], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(blob);
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("SVG load failed")); };
+    img.src = url;
+  });
+}
+
+/**
+ * Draws the design template's center marker onto the canvas at (cx, cy).
+ * Must be called while the mask clip is still active so the marker is contained.
+ */
+export async function drawDesignCenterMarker(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  height: number,
+  marker: DesignCenterMarker,
+  fallbackColor: string,
+): Promise<void> {
+  if (marker.type === "none") return;
+
+  const color = marker.color ?? fallbackColor;
+  const sizePct = marker.size ?? (marker.type === "dot" ? 1.6 : marker.type === "heart" ? 6 : 7);
+  const sizePx = (sizePct / 100) * height;
+
+  if (marker.type === "dot") {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, sizePx / 2, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    if (marker.outlineColor) {
+      ctx.strokeStyle = marker.outlineColor;
+      ctx.lineWidth = marker.outlineWidth ?? 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
+
+  if (marker.type === "ring") {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, sizePx / 2, 0, Math.PI * 2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = marker.outlineWidth ?? 1.5;
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
+  if (marker.type === "heart") {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${sizePx}" height="${sizePx}"><path d="M12 21s-7.5-4.6-7.5-10.5C4.5 7 7 4.5 9.8 4.5c1.7 0 3.2.9 4.2 2.3 1-1.4 2.5-2.3 4.2-2.3 2.8 0 5.3 2.5 5.3 6 0 5.9-7.5 10.5-7.5 10.5h-4Z" fill="${color}"/></svg>`;
+    const img = await loadSvgImage(svg);
+    ctx.drawImage(img, cx - sizePx / 2, cy - sizePx / 2, sizePx, sizePx);
+    return;
+  }
+
+  if (marker.type === "pin") {
+    const pinW = sizePx * 0.75;
+    const pinH = sizePx;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32" width="${pinW}" height="${pinH}"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0Z" fill="${color}"/><circle cx="12" cy="12" r="4" fill="#ffffff" opacity="0.9"/></svg>`;
+    const img = await loadSvgImage(svg);
+    // Match CSS transform: translate(-50%, -75%) — pin tip (bottom-center) lands at cy + 25% of pinH
+    ctx.drawImage(img, cx - pinW / 2, cy - pinH * 0.75, pinW, pinH);
+    return;
+  }
 }
 
 /* ── Public: resolve design template elements ── */
