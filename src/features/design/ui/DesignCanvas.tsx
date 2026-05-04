@@ -151,6 +151,10 @@ const TextNode = memo(function TextNode({
     letterSpacing: element.letterSpacing != null
       ? `${element.letterSpacing}em`
       : undefined,
+    // Compensate for trailing letter-spacing when centering
+    paddingLeft: (element.textAlign ?? "center") === "center" && element.letterSpacing != null
+      ? `${element.letterSpacing}em`
+      : undefined,
     lineHeight: element.lineHeight ?? 1.2,
     textTransform: element.textTransform ?? "none",
     color: element.color ?? fallbackColor,

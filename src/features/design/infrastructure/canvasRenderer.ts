@@ -355,13 +355,50 @@ export async function drawDesignElementsOnCanvas(
       ctx.fillStyle = color;
 
       // letter-spacing: modern Canvas API (Chrome 99+, FF 116+)
+      let letterSpacingPx = 0;
       if (el.letterSpacing != null && "letterSpacing" in ctx) {
         (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing =
           `${el.letterSpacing}em`;
+        letterSpacingPx = el.letterSpacing * fontSizePx;
       }
 
-      // Map anchorX → ctx.textAlign (positions text relative to the translated origin)
-      ctx.textAlign = anchorX === "left" ? "left" : anchorX === "right" ? "right" : "center";
+      let textOffsetX = 0;
+      if (el.width != null) {
+        const widthPx = (el.width / 100) * width;
+        let boxLeft = 0;
+        let boxRight = 0;
+        if (anchorX === "center") {
+          boxLeft = -widthPx / 2;
+          boxRight = widthPx / 2;
+        } else if (anchorX === "left") {
+          boxLeft = 0;
+          boxRight = widthPx;
+        } else if (anchorX === "right") {
+          boxLeft = -widthPx;
+          boxRight = 0;
+        }
+
+        if (el.textAlign === "left") {
+          ctx.textAlign = "left";
+          textOffsetX = boxLeft;
+        } else if (el.textAlign === "right") {
+          ctx.textAlign = "right";
+          textOffsetX = boxRight;
+        } else {
+          ctx.textAlign = "center";
+          textOffsetX = (boxLeft + boxRight) / 2;
+        }
+      } else {
+        ctx.textAlign = el.textAlign ?? (anchorX === "left" ? "left" : anchorX === "right" ? "right" : "center");
+        textOffsetX = 0;
+      }
+
+      // Canvas letter-spacing adds space after each character. For center alignment, 
+      // this visually shifts the text left by half the letter spacing. We compensate here.
+      if (ctx.textAlign === "center" && letterSpacingPx > 0) {
+        textOffsetX += letterSpacingPx / 2;
+      }
+
       ctx.textBaseline = anchorY === "top" ? "top" : anchorY === "bottom" ? "bottom" : "middle";
 
       const lineHeightPx = (el.lineHeight ?? 1.2) * fontSizePx;
@@ -386,7 +423,7 @@ export async function drawDesignElementsOnCanvas(
       else if (anchorY === "bottom") startY = -(blockHeight - lineHeightPx);
 
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], 0, startY + i * lineHeightPx);
+        ctx.fillText(lines[i], textOffsetX, startY + i * lineHeightPx);
       }
 
       if ("letterSpacing" in ctx) {
