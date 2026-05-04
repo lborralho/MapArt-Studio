@@ -6,6 +6,46 @@
       "name": "Print",
       "layouts": [
         {
+          "id": "print_ratio_2_3",
+          "name": "Ratio 2:3",
+          "description": "2:3 print ratio (e.g., 60x90cm).",
+          "width": 60,
+          "height": 90,
+          "unit": "cm",
+          "posterWidthCm": 60,
+          "posterHeightCm": 90
+        },
+        {
+          "id": "print_ratio_3_4",
+          "name": "Ratio 3:4",
+          "description": "3:4 print ratio (e.g., 60x80cm).",
+          "width": 60,
+          "height": 80,
+          "unit": "cm",
+          "posterWidthCm": 60,
+          "posterHeightCm": 80
+        },
+        {
+          "id": "print_ratio_4_5",
+          "name": "Ratio 4:5",
+          "description": "4:5 print ratio (e.g., 60x75cm).",
+          "width": 60,
+          "height": 75,
+          "unit": "cm",
+          "posterWidthCm": 60,
+          "posterHeightCm": 75
+        },
+        {
+          "id": "print_iso_a",
+          "name": "ISO / A",
+          "description": "ISO A series print ratio (e.g., A1 59.4x84.1cm).",
+          "width": 59.4,
+          "height": 84.1,
+          "unit": "cm",
+          "posterWidthCm": 59.4,
+          "posterHeightCm": 84.1
+        },
+        {
           "id": "print_a3_portrait",
           "name": "A3 Portrait",
           "description": "ISO A3 portrait format.",

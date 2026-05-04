@@ -41,7 +41,7 @@ export function createNominatimAdapter(
 
     const url =
       "https://nominatim.openstreetmap.org/search?" +
-      `format=jsonv2&addressdetails=1&limit=${normalizedLimit}&q=${encodeURIComponent(lookup)}`;
+      `format=jsonv2&addressdetails=1&accept-language=en&limit=${normalizedLimit}&q=${encodeURIComponent(lookup)}`;
 
     const response = await http.get(
       url,
@@ -118,7 +118,7 @@ export function createNominatimAdapter(
 
     const url =
       "https://nominatim.openstreetmap.org/reverse?" +
-      `format=jsonv2&addressdetails=1&zoom=10&lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`;
+      `format=jsonv2&addressdetails=1&accept-language=en&zoom=10&lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`;
 
     const promise = http
       .get(url, { headers: { Accept: "application/json" } }, 16_000)
