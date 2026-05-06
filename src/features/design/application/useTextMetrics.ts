@@ -5,20 +5,25 @@
  *
  *  Pass 1 — DOM:
  *    getBoundingClientRect() on the rendered node gives the full CSS layout
- *    box. This handles multi-line text-wrap, letter-spacing, and kerning
- *    natively — no need to reimplement CSS text layout.
+ *    box. We then read the computed paddingLeft / paddingRight to find the
+ *    inner content area, and subtract trailing letter-spacing from the right
+ *    edge to get the actual ink extent.
+ *
+ *    Why paddingLeft matters: TextNode applies `padding-left: ${ls}em` for
+ *    text-align:center + letter-spacing as a visual-centering hack. Without
+ *    accounting for it here, bounds.cx is off by trailing/2 and alignment
+ *    buttons + snap guides place text off-center.
  *
  *  Pass 2 — OffscreenCanvas:
  *    measureText('Ag') with the matching font spec returns
  *    actualBoundingBoxAscent + actualBoundingBoxDescent — the real ink
- *    metrics, independent of line-height.
- *    halfLeading = (lineHeightPx - inkHeightPx) / 2 is removed from the
- *    top and bottom of the CSS box.
+ *    metrics, independent of line-height. Half-leading is removed from
+ *    the top and bottom of the CSS box symmetrically, so the visual
+ *    vertical center equals the CSS box vertical center.
  *
- *  Result: a bounding box that wraps the visible ink, not the line-height
- *  cage. Since topTrim === bottomTrim (symmetric half-leading), the visual
- *  center equals the CSS center — so translate(-50%, -50%) positioning
- *  remains correct without any extra offset.
+ *  Result: a bounding box that wraps the visible ink. Both the X and Y
+ *  centers are reported in normalized poster space (0-100%) so alignment
+ *  and snap math can compensate via vOffX/Y = bounds.cx/y - element.cx/y.
  */
 
 import { useLayoutEffect } from "react";
@@ -104,32 +109,45 @@ export function useTextMetrics(
     const containerRect = container.getBoundingClientRect();
 
     if (nodeRect.width === 0 || nodeRect.height === 0) return;
+    if (containerRect.width === 0 || containerRect.height === 0) return;
 
-    // ── Convert CSS pixel box → normalized poster % ──────
-    const cssLeft =
-      ((nodeRect.left - containerRect.left) / containerRect.width) * 100;
-    const cssTop =
-      ((nodeRect.top - containerRect.top) / containerRect.height) * 100;
-    const cssWidth = (nodeRect.width / containerRect.width) * 100;
-    const cssHeight = (nodeRect.height / containerRect.height) * 100;
-
-    // ── Right-trim phantom trailing letter-spacing ────────
-    // CSS letter-spacing adds a gap AFTER the last character, making
-    // getBoundingClientRect() wider than the actual ink. Subtract it.
-    let visualWidth = cssWidth;
-    if (element.letterSpacing != null && element.letterSpacing !== 0) {
-      const fontSizePx = ((element.fontSize ?? 3) / 100) * containerRect.height;
-      const trailingPx = element.letterSpacing * fontSizePx;
-      visualWidth = Math.max(0.01, cssWidth - (trailingPx / containerRect.width) * 100);
+    // ── Read computed paddings (TextNode adds padding-left for centered
+    //     text with letter-spacing as a visual-centering hack) ─────────
+    let padLeftPx = 0;
+    let padRightPx = 0;
+    if (node instanceof Element) {
+      const cs = window.getComputedStyle(node);
+      padLeftPx = parseFloat(cs.paddingLeft) || 0;
+      padRightPx = parseFloat(cs.paddingRight) || 0;
     }
 
-    // ── Remove half-leading from top and bottom ───────────
+    // ── Trailing letter-spacing in pixels (CSS adds gap after EVERY char,
+    //     including the last — getBoundingClientRect includes that gap) ─
+    const fontSizePx = ((element.fontSize ?? 3) / 100) * containerRect.height;
+    const trailingPx =
+      element.letterSpacing != null && element.letterSpacing !== 0
+        ? element.letterSpacing * fontSizePx
+        : 0;
+
+    // ── Compute visual ink bounds in pixels ──────────────────
+    // inkLeft   = boxLeft + paddingLeft           (text starts after padding)
+    // inkRight  = boxRight - paddingRight - trail (last char's trailing gap is invisible)
+    const inkLeftPx = nodeRect.left + padLeftPx;
+    const inkRightPx = nodeRect.right - padRightPx - trailingPx;
+    const inkWidthPx = Math.max(0.01, inkRightPx - inkLeftPx);
+
+    // ── Convert pixels → normalized poster % ─────────────────
+    const cssTop = ((nodeRect.top - containerRect.top) / containerRect.height) * 100;
+    const cssHeight = (nodeRect.height / containerRect.height) * 100;
+    const inkLeftPct = ((inkLeftPx - containerRect.left) / containerRect.width) * 100;
+    const visualWidth = (inkWidthPx / containerRect.width) * 100;
+
+    // ── Remove half-leading from top and bottom ──────────────
     const trim = computeInkTrim(element, containerRect.height);
     const visualHeight = Math.max(0.01, cssHeight - trim.topPercent - trim.bottomPercent);
 
-    // topTrim === bottomTrim → visual center === CSS center (no cy correction).
-    // The trailing space is right-only, so cx shifts left by half the trimmed amount.
-    const cx = cssLeft + visualWidth / 2;
+    // topTrim === bottomTrim → visual vertical center === CSS box center.
+    const cx = inkLeftPct + visualWidth / 2;
     const cy = cssTop + trim.topPercent + visualHeight / 2;
 
     onBounds(element.id, {
