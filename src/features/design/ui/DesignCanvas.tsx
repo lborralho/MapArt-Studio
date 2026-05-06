@@ -29,6 +29,7 @@ import { useTextMetrics } from "../application/useTextMetrics";
 import { useDragInteraction } from "../application/useDragInteraction";
 import { SelectionHandles } from "./SelectionHandles";
 import { SnapGuides } from "./SnapGuides";
+import { DistanceGuides } from "./DistanceGuides";
 
 // ─────────────────────────────────────────────────────────────
 // No-op handle — used when isEditing=false or editorHandle is absent
@@ -73,6 +74,11 @@ export interface DesignCanvasProps {
 // Internal: per-node props
 // ─────────────────────────────────────────────────────────────
 
+interface NodeHoverHandlers {
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}
+
 interface NodeProps {
   element: EditorElement;
   isActive: boolean;
@@ -85,6 +91,8 @@ interface NodeProps {
   onBoundsUpdate: (id: string, bounds: ElementBounds) => void;
   /** Pointer event handlers from useDragInteraction — replaces onClick selection. */
   interactionHandlers: ElementHandlers | null;
+  /** Mouse enter/leave handlers used to track ALT+hover for distance guides. */
+  hoverHandlers: NodeHoverHandlers | null;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -125,6 +133,7 @@ const TextNode = memo(function TextNode({
   isEditing,
   onBoundsUpdate,
   interactionHandlers,
+  hoverHandlers,
 }: NodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
   useTextMetrics(nodeRef, containerRef, element, onBoundsUpdate);
@@ -175,6 +184,8 @@ const TextNode = memo(function TextNode({
       onPointerMove={interactionHandlers?.onPointerMove}
       onPointerUp={interactionHandlers?.onPointerUp}
       onPointerCancel={interactionHandlers?.onPointerCancel}
+      onMouseEnter={hoverHandlers?.onMouseEnter}
+      onMouseLeave={hoverHandlers?.onMouseLeave}
     >
       {content}
     </div>
@@ -193,6 +204,7 @@ const DividerNode = memo(function DividerNode({
   isEditing,
   onBoundsUpdate,
   interactionHandlers,
+  hoverHandlers,
 }: NodeProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
   useTextMetrics(nodeRef, containerRef, element, onBoundsUpdate);
@@ -222,6 +234,8 @@ const DividerNode = memo(function DividerNode({
       onPointerMove={interactionHandlers?.onPointerMove}
       onPointerUp={interactionHandlers?.onPointerUp}
       onPointerCancel={interactionHandlers?.onPointerCancel}
+      onMouseEnter={hoverHandlers?.onMouseEnter}
+      onMouseLeave={hoverHandlers?.onMouseLeave}
     />
   );
 });
@@ -239,6 +253,7 @@ const ArcTextNode = memo(function ArcTextNode({
   isEditing,
   onBoundsUpdate,
   interactionHandlers,
+  hoverHandlers,
 }: NodeProps) {
   useEffect(() => {
     if (!posterWidth || !posterHeight) return;
@@ -287,6 +302,8 @@ const ArcTextNode = memo(function ArcTextNode({
       onPointerMove={interactionHandlers?.onPointerMove}
       onPointerUp={interactionHandlers?.onPointerUp}
       onPointerCancel={interactionHandlers?.onPointerCancel}
+      onMouseEnter={hoverHandlers?.onMouseEnter}
+      onMouseLeave={hoverHandlers?.onMouseLeave}
     >
       <defs>
         <path id={pathId} d={d} fill="none" />
@@ -343,6 +360,12 @@ export function DesignCanvas({
   const [posterWidth, setPosterWidth] = useState(0);
   const [posterHeight, setPosterHeight] = useState(0);
 
+  // ALT-hover distance measurement state.
+  // Guides appear only when an element is selected, ALT is held, and the user
+  // hovers a different element.
+  const [altHeld, setAltHeld] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
   // Track container pixel dimensions for px ↔ % conversion in nodes + handles
   useLayoutEffect(() => {
     const el = containerRef.current;
@@ -356,6 +379,26 @@ export function DesignCanvas({
     return () => ro.disconnect();
   }, []);
 
+  // Window-level ALT key tracking (only while editing).
+  useEffect(() => {
+    if (!isEditing) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Alt" || e.altKey) setAltHeld(true);
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Alt" || !e.altKey) setAltHeld(false);
+    };
+    const onBlur = () => setAltHeld(false);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [isEditing]);
+
   // Drag engine — always instantiated; noop when editorHandle is absent
   const effectiveHandle = isEditing && editorHandle ? editorHandle : NO_OP_HANDLE;
   const drag = useDragInteraction(containerRef, effectiveHandle);
@@ -366,6 +409,18 @@ export function DesignCanvas({
     : undefined;
   const activeBounds = activeElementId
     ? effectiveHandle.getBounds(activeElementId)
+    : undefined;
+
+  // Distance guides — active when selection + ALT + hover on a different element.
+  const showDistanceGuides =
+    isEditing &&
+    altHeld &&
+    !!activeElementId &&
+    !!hoveredId &&
+    hoveredId !== activeElementId &&
+    drag.activeMode === null;
+  const hoveredBounds = showDistanceGuides
+    ? effectiveHandle.getBounds(hoveredId)
     : undefined;
 
   return (
@@ -398,11 +453,30 @@ export function DesignCanvas({
           interactionHandlers={
             isEditing ? drag.getNodeHandlers(el.id) : null
           }
+          hoverHandlers={
+            isEditing
+              ? {
+                  onMouseEnter: () => setHoveredId(el.id),
+                  onMouseLeave: () =>
+                    setHoveredId((prev) => (prev === el.id ? null : prev)),
+                }
+              : null
+          }
         />
       ))}
 
       {/* Snap guides — rendered above nodes, below selection handles */}
       {isEditing && <SnapGuides activeSnaps={drag.activeSnaps} />}
+
+      {/* Distance guides — ALT + hover while an element is selected */}
+      {showDistanceGuides && activeBounds && hoveredBounds && (
+        <DistanceGuides
+          active={activeBounds}
+          hovered={hoveredBounds}
+          posterWidth={posterWidth}
+          posterHeight={posterHeight}
+        />
+      )}
 
       {/* Selection handles — rendered above all nodes for the active element */}
       {isEditing && activeElement && (
